@@ -1,12 +1,38 @@
 {
   "name": "wizcord",
-  "module": "index.ts",
+  "module": "server/serve.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "dev": "bun --watch server/serve.ts",
+    "build": "drizzle-kit push --env production",
+    "start": "bun run server/serve.ts",
+    "db:mgr": "drizzle-kit migrate",
+    "db:gen": "drizzle-kit generate",
+    "db:push": "drizzle-kit push"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.31.4",
+    "tsx": "^4.20.3"
   },
   "peerDependencies": {
     "typescript": "^5"
-  }
+  },
+  "dependencies": {
+    "@clerk/backend": "^2.4.1",
+    "@hono/clerk-auth": "^3.0.2",
+    "@hono/zod-validator": "^0.7.1",
+    "@neondatabase/serverless": "^1.0.1",
+    "@tanstack/react-router": "^1.125.6",
+    "dotenv": "^17.2.0",
+    "drizzle-orm": "^0.44.2",
+    "hono": "^4.8.4",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0",
+    "zod": "^4.0.5"
+  },
+  "trustedDependencies": [
+    "@clerk/shared"
+  ]
 }
