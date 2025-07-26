@@ -1,4 +1,4 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+    import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 type propType = {
     value: string;
@@ -12,12 +12,7 @@ export default function SelectFieldTab({ value, onValueChange, className }: prop
                 <TabsTrigger value="create">Create</TabsTrigger>
                 <TabsTrigger value="join">Join</TabsTrigger>
             </TabsList>
-            <TabsContent value="create">
-                Make changes to your account here.
-            </TabsContent>
-            <TabsContent value="join">
-                Change your password here.
-            </TabsContent>
+           
         </Tabs>
     )
 }
