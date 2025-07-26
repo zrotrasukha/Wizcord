@@ -32,6 +32,8 @@ const route = app
         return c.json({ message: "Test route is working" });
     });
 app.onError(onError);
-
+app.notFound((c) => {
+    return c.json({ error: "Not Found" }, 404);
+})
 export default app;
 export type appType = typeof route;
