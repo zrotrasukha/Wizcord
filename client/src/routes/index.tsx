@@ -3,8 +3,8 @@ import react from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import ServerDialogue from '@/components/ui/serverDialogue'
 import { createApi } from '@/lib/api'
-import type { ServerType } from '@server/src/types/server.type'
-import { FaCirclePlus } from "react-icons/fa6";
+import type { ServerType } from '@/types/app.types'
+import { FaCirclePlus as Plus} from "react-icons/fa6";
 
 export const Route = createFileRoute('/')({
   component: RouteComponent,
@@ -20,40 +20,56 @@ function RouteComponent() {
   const { getToken, isSignedIn } = useAuth();
   const [token, setToken] = react.useState('');
   const [isLoading, setIsLoading] = react.useState(true);
-  const [servers, setServers] = react.useState<ServerType[]>([]);
+  const [servers, setServers] = react.useState<ServerType[] | null>([]);
   const [showServerDialogue, setShowServerDialogue] = react.useState(false);
 
 
-  const api = createApi(token);
-  const fetchServers = async () => {
+  const fetchServers = react.useCallback(async (): Promise<ServerType[] | []> => {
+    if (!token) return [];
+
     try {
+      const api = createApi(token);
       const res = await api.server.getservers.$get();
-      const data = (await res.json()) as { servers: ServerType[] };
-      return data.servers;
+      if (!res.ok) {
+        console.error("Failed to fetch servers: ", res.status);
+        return [];
+      }
+      const data = await res.json();
+      // TODO: Remove this debug log in production
+      console.log("API Response:", data);
+
+      // Ensure the response has the expected structure
+      if (data && typeof data === 'object' && 'servers' in data && Array.isArray(data.servers)) {
+        return data.servers as ServerType[];
+      }
+
+      console.error("Unexpected API response structure:", data);
+      return [];
     } catch (e) {
       console.error("Failed to fetch servers", e);
       return [];
     }
-  };
+  }, [token]);
+
   react.useEffect(() => {
     const fetchToken = async () => {
       const token = await getToken({});
       setToken(token || '');
     }
     fetchToken();
-  }, [getToken, isSignedIn, fetchServers]);
+  }, [getToken, isSignedIn]);
 
   react.useEffect(() => {
     if (!token) return;
     setIsLoading(true);
     const loadServers = async () => {
       const servers = await fetchServers();
-      setServers(servers);
+      setServers(servers as ServerType[]);
       setShowServerDialogue(servers.length === 0);
       setIsLoading(false);
     }
     loadServers();
-  }, [token]);
+  }, [token, fetchServers]);
 
 
   const onCompleteHandler = async () => {
@@ -67,16 +83,42 @@ function RouteComponent() {
   return (
     <>
       <TokenContext.Provider value={{ token, setToken }}>
+        {/* Server Creation Dialog */}
         {showServerDialogue ? (
           <ServerDialogue
             onComplete={onCompleteHandler}
           />
         ) : (
           <div className='h-screen w-screen bg-zinc-950 flex items-center relative'>
-              // sidebar
-            <div className='absolute flex flex-col h-screen w-[65px] bg-zinc-600 left-0  overflow-hidden'>
-              <div className='w-full h-14 bg-blue-600 flex items-center justify-center p-0 '>
-                <FaCirclePlus size={40} className='text-white rounded-full hover:bg-white hover:text-blue-500 hover:shadow-2xl transition-colors' />
+            {/* sidebar */}
+            <div className='py-2 absolute flex flex-col h-screen w-[65px] bg-zinc-600 left-0  overflow-hidden'>
+              {/* Plus icon */}
+              <button className='mb-2 w-full h-14 bg-transparent flex items-center justify-center p-0 ' 
+              onClick={() => setShowServerDialogue(true)}>
+                <Plus size={42} className='text-white hover:text-blue-400 transition-all duration-200 cursor-pointer' />
+              </button>
+              <div className='h- bg-white rounded-2xl w-3/4 mb-3 place-self-center' />
+              {/* server list*/}
+              <div>
+                {servers?.map((server) => {
+                  return (
+                    <div key={server.id} className='w-full h-14  flex items-center justify-center p-0 hover:bg-zinc-800 transition-colors cursor-pointer '>
+                      {server.icon ? (
+                        <img
+                          src={server.icon}
+                          alt={server.name}
+                          className='w-8 h-8 rounded-full object-cover'
+                        />
+                      ) : (
+                        <button className='w-12 h-12 bg-zinc-500 rounded-full flex items-center justify-center'>
+                          <span className='text-white text-xs font-bold'>
+                            {server.name.charAt(0).toUpperCase()}
+                          </span>
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>
