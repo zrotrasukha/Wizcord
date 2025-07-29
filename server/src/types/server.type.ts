@@ -1,5 +1,4 @@
 import { z } from "zod/v4";
-
 import { server } from "@/src/db/schemas/schema";
 export type ServerType = typeof server.$inferSelect;
 export type ReturnServerType = Omit<ServerType, 'name' | 'admin' | 'icon' | 'description'>;
