@@ -8,11 +8,13 @@ import { useAuth } from '@clerk/clerk-react'
 import { useContext, useEffect, useState } from 'react'
 import { TokenContext } from '@/routes'
 import { RxCross2 as Cross} from "react-icons/rx";
+
 type ServerDialogueProps = {
   onComplete: () => void;
+  setShowServerDialogue: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function ServerDialogue({ onComplete }: ServerDialogueProps) {
+export default function ServerDialogue({ onComplete, setShowServerDialogue }: ServerDialogueProps) {
 
   const [tabField, setTabField] = useState('create');
   const [joinServerLink, setJoinServerLink] = useState('');
@@ -58,7 +60,7 @@ export default function ServerDialogue({ onComplete }: ServerDialogueProps) {
         <Cross 
           className="absolute top-5 right-5 cursor-pointer text-gray-400 hover:text-white transition-colors z-10" 
           size={20}
-          onClick={() => onComplete()} 
+          onClick={() => setShowServerDialogue(false)} 
         />
         <Button onClick={getServers}>getServers</Button>
         <SelectFieldTab value={tabField} onValueChange={setTabField} className='' />
