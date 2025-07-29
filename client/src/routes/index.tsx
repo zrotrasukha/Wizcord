@@ -1,70 +1,88 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
-import { Card, CardFooter, } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useState } from 'react'
-import SelectFieldTab from '@/components/ui/selectFieldTab'
-import { createApi } from '@/lib/api'
+import react from 'react'
 import { useAuth } from '@clerk/clerk-react'
-// import {createServerSchema, type createServerType} from '../../../server/src/types/server.type'
+import ServerDialogue from '@/components/ui/serverDialogue'
+import { createApi } from '@/lib/api'
+import type { ServerType } from '@server/src/types/server.type'
+import { FaCirclePlus } from "react-icons/fa6";
+
 export const Route = createFileRoute('/')({
   component: RouteComponent,
 })
+type contextType = {
+  token: string;
+  setToken: React.Dispatch<React.SetStateAction<string>>;
+};
+
+export const TokenContext = react.createContext<contextType | null>(null);
+
 function RouteComponent() {
-  const [tabField, setTabField] = useState('create');
-  const [servername, setservername] = useState('');
-  const [joinServerLink, setJoinServerLink] = useState('');
-  const { getToken } = useAuth();
+  const { getToken, isSignedIn } = useAuth();
+  const [token, setToken] = react.useState('');
+  const [isLoading, setIsLoading] = react.useState(true);
+  const [servers, setServers] = react.useState<ServerType[]>([]);
+  const [showServerDialogue, setShowServerDialogue] = react.useState(false);
 
-  const handleCreateServer = async () => {
-    const api = createApi(await getToken());
-    const response = await api.server.create.$post({
-      json: {
-        name: servername
-      }
-    });
-    console.log(await response.json());
+
+  const api = createApi(token);
+  const fetchServers = async () => {
+    try {
+      const res = await api.server.getservers.$get();
+      const data = (await res.json()) as { servers: ServerType[] };
+      return data.servers;
+    } catch (e) {
+      console.error("Failed to fetch servers", e);
+      return [];
+    }
   };
-  const getServers = async () => {
-    const api = createApi(await getToken());
-    // const response = await api.server.getservers.$get();
-    const response = await api.server.getservers.$get();
-    console.log(await response.json());
+  react.useEffect(() => {
+    const fetchToken = async () => {
+      const token = await getToken({});
+      setToken(token || '');
+    }
+    fetchToken();
+  }, [getToken, isSignedIn]);
+
+  react.useEffect(() => {
+    if (!token) return;
+    setIsLoading(true);
+    const loadServers = async () => {
+      const servers = await fetchServers();
+      setServers(servers);
+      setShowServerDialogue(servers.length === 0);
+      setIsLoading(false);
+    }
+    loadServers();
+  }, [token]);
 
 
+  const onCompleteHandler = async () => {
+    const servers = await fetchServers();
+    setServers(servers);
+    setShowServerDialogue(false);
+  }
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
   return (
-    <div className='bg-zinc-900 h-screen flex items-center justify-center'>
-      <Card className='flex flex-col w-[400px] h-fit justify-center items-center'>
-        <Button onClick={getServers}>getServers</Button>
-        <SelectFieldTab value={tabField} onValueChange={setTabField} className='' />
-        {tabField === 'create' ? (
-          <div className='w-full px-4'>
-            <Label htmlFor='server-name' className='font-semibold  pb-2'>Please fill your legendary server name</Label>
-            <Input value={servername} onChange={(e) => setservername(e.target.value)} id='server-name' placeholder='Enter server name' className='italic' />
-            <CardFooter className='flex w-full items-center justify-end p-0 mt-2'>
-              <Button onClick={handleCreateServer}>Create</Button>
-            </CardFooter>
-          </div>
+    <>
+      <TokenContext.Provider value={{ token, setToken }}>
+        {showServerDialogue ? (
+          <ServerDialogue
+            onComplete={onCompleteHandler}
+          />
         ) : (
-          <div className='w-full px-4'>
-            <Label htmlFor='join-link' className='font-semibold  pb-2'>Enter server invite link</Label>
-            <Input
-              value={joinServerLink}
-              onChange={(e) => setJoinServerLink(e.target.value.replace(/\s/g, ''))}
-              id='join-link'
-              placeholder='Enter invite link'
-              className='italic'
-            />
-            <CardFooter className='flex w-full items-center justify-end p-0 mt-2'>
-              <Button>Join</Button>
-            </CardFooter>
+          <div className='h-screen w-screen bg-zinc-950 flex items-center relative'>
+              // sidebar
+            <div className='absolute flex flex-col h-screen w-[65px] bg-zinc-600 left-0  overflow-hidden'>
+              <div className='w-full h-14 bg-blue-600 flex items-center justify-center p-0 '>
+                <FaCirclePlus size={40} className='text-white rounded-full hover:bg-white hover:text-blue-500 hover:shadow-2xl transition-colors' />
+              </div>
+            </div>
           </div>
-        )
-        }
-      </Card >
-    </div >
+        )}
+      </TokenContext.Provider>
+    </>
   )
 }
 
