@@ -87,6 +87,7 @@ function RouteComponent() {
         {showServerDialogue ? (
           <ServerDialogue
             onComplete={onCompleteHandler}
+            setShowServerDialogue={setShowServerDialogue}
           />
         ) : (
           <div className='h-screen w-screen bg-zinc-950 flex items-center relative'>
