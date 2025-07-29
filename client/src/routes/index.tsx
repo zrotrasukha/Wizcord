@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import react from 'react'
+import react, { useCallback } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import ServerDialogue from '@/components/ui/serverDialogue'
-import { createApi } from '@/lib/api'
+import { createApi, useHonoApi } from '@/lib/api'
 import type { ServerType } from '@server/src/types/server.type'
 import { FaCirclePlus } from "react-icons/fa6";
 
@@ -22,48 +22,15 @@ function RouteComponent() {
   const [isLoading, setIsLoading] = react.useState(true);
   const [servers, setServers] = react.useState<ServerType[]>([]);
   const [showServerDialogue, setShowServerDialogue] = react.useState(false);
-
-
-  const api = createApi(token);
-  const fetchServers = async () => {
-    try {
-      const res = await api.server.getservers.$get();
-      const data = (await res.json()) as { servers: ServerType[] };
-      return data.servers;
-    } catch (e) {
-      console.error("Failed to fetch servers", e);
+  const api = useHonoApi(); 
+  const fetchServers = useCallback(async () => {
+    try{
+      const response = await api.
+    } catch(error) {
+      console.error('Error fetching servers:', error);
       return [];
     }
-  };
-  react.useEffect(() => {
-    const fetchToken = async () => {
-      const token = await getToken({});
-      setToken(token || '');
-    }
-    fetchToken();
-  }, [getToken, isSignedIn]);
-
-  react.useEffect(() => {
-    if (!token) return;
-    setIsLoading(true);
-    const loadServers = async () => {
-      const servers = await fetchServers();
-      setServers(servers);
-      setShowServerDialogue(servers.length === 0);
-      setIsLoading(false);
-    }
-    loadServers();
-  }, [token]);
-
-
-  const onCompleteHandler = async () => {
-    const servers = await fetchServers();
-    setServers(servers);
-    setShowServerDialogue(false);
-  }
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  }, [api]);
   return (
     <>
       <TokenContext.Provider value={{ token, setToken }}>
