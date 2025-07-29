@@ -7,7 +7,7 @@ import { createApi } from '@/lib/api'
 import { useAuth } from '@clerk/clerk-react'
 import { useContext, useEffect, useState } from 'react'
 import { TokenContext } from '@/routes'
-
+import { RxCross2 as Cross} from "react-icons/rx";
 type ServerDialogueProps = {
   onComplete: () => void;
 }
@@ -38,6 +38,7 @@ export default function ServerDialogue({ onComplete }: ServerDialogueProps) {
     const api = createApi(token)
     const response = await api.server.getservers.$get();
     console.log(await response.json());
+
   }
 
   // For fetching if the user has 0 server then show the create server dialogue
@@ -53,30 +54,35 @@ export default function ServerDialogue({ onComplete }: ServerDialogueProps) {
   };
   return (
     <div className='bg-zinc-900 h-screen flex items-center justify-center'>
-      <Card className='flex flex-col w-[400px] h-fit justify-center items-center'>
+      <Card className='flex flex-col w-[400px] h-fit justify-center items-center relative'>
+        <Cross 
+          className="absolute top-5 right-5 cursor-pointer text-gray-400 hover:text-white transition-colors z-10" 
+          size={20}
+          onClick={() => onComplete()} 
+        />
         <Button onClick={getServers}>getServers</Button>
         <SelectFieldTab value={tabField} onValueChange={setTabField} className='' />
         {tabField === 'create' ? (
           <div className='w-full px-4'>
-            <Label htmlFor='server-name' className='font-semibold  pb-2'>Please fill your legendary server name</Label>
-            <Input value={servername} onChange={(e) => setservername(e.target.value)} id='server-name' placeholder='Enter server name' className='italic' />
-            <CardFooter className='flex w-full items-center justify-end p-0 mt-2'>
-              <Button onClick={handleCreateServer}>Create</Button>
-            </CardFooter>
+        <Label htmlFor='server-name' className='font-semibold  pb-2'>Please fill your legendary server name</Label>
+        <Input value={servername} onChange={(e) => setservername(e.target.value)} id='server-name' placeholder='Enter server name' className='italic' />
+        <CardFooter className='flex w-full items-center justify-end p-0 mt-2'>
+          <Button onClick={handleCreateServer}>Create</Button>
+        </CardFooter>
           </div>
         ) : (
           <div className='w-full px-4'>
-            <Label htmlFor='join-link' className='font-semibold  pb-2'>Enter server invite link</Label>
-            <Input
-              value={joinServerLink}
-              onChange={(e) => setJoinServerLink(e.target.value.replace(/\s/g, ''))}
-              id='join-link'
-              placeholder='Enter invite link'
-              className='italic'
-            />
-            <CardFooter className='flex w-full items-center justify-end p-0 mt-2'>
-              <Button>Join</Button>
-            </CardFooter>
+        <Label htmlFor='join-link' className='font-semibold  pb-2'>Enter server invite link</Label>
+        <Input
+          value={joinServerLink}
+          onChange={(e) => setJoinServerLink(e.target.value.replace(/\s/g, ''))}
+          id='join-link'
+          placeholder='Enter invite link'
+          className='italic'
+        />
+        <CardFooter className='flex w-full items-center justify-end p-0 mt-2'>
+          <Button>Join</Button>
+        </CardFooter>
           </div>
         )}
       </Card >
