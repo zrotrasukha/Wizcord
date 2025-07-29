@@ -41,7 +41,7 @@ function RouteComponent() {
       setToken(token || '');
     }
     fetchToken();
-  }, [getToken, isSignedIn]);
+  }, [getToken, isSignedIn, fetchServers]);
 
   react.useEffect(() => {
     if (!token) return;
