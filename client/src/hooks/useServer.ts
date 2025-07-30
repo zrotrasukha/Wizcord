@@ -48,6 +48,6 @@ export const useServer = (token: string) => {
     }, [fetchServers])
 
 
-    return { servers, fetchServers, refreshServers }
+    return { servers, isLoading, refreshServers }
 }
 
