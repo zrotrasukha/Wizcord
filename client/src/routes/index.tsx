@@ -90,12 +90,12 @@ function RouteComponent() {
           <div className='h-screen w-screen bg-zinc-950 flex items-center relative'>
             {/* sidebar */}
             <div className='py-2 absolute flex flex-col h-screen w-[65px] bg-zinc-600 left-0  overflow-hidden'>
-              {/* Plus icon */}
+              {/* Plus icon */} 
               <button className='mb-2 w-full h-14 bg-transparent flex items-center justify-center p-0 '
                 onClick={() => setShowServerDialogue(true)}>
                 <Plus size={42} className='text-white hover:text-blue-400 transition-all duration-200 cursor-pointer' />
               </button>
-              <div className='h- bg-white rounded-2xl w-3/4 mb-3 place-self-center' />
+              <div className='h-[2px] w-3/4 place-self-center bg-white rounded-2xl mb-3 ' />
               {/* server list*/}
               <div>
                 {servers?.map((server) => {
