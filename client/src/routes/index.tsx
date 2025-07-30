@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import react from 'react'
+import react, { useMemo } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import ServerDialogue from '@/components/ui/serverDialogue'
 import { createApi } from '@/lib/api'
 import type { ServerType } from '@/types/app.types'
-import { FaCirclePlus as Plus} from "react-icons/fa6";
+import { FaCirclePlus as Plus } from "react-icons/fa6";
 
 export const Route = createFileRoute('/')({
   component: RouteComponent,
@@ -24,33 +24,32 @@ function RouteComponent() {
   const [showServerDialogue, setShowServerDialogue] = react.useState(false);
 
 
-  const fetchServers = react.useCallback(async (): Promise<ServerType[] | []> => {
-    if (!token) return [];
-
-    try {
-      const api = createApi(token);
-      const res = await api.server.getservers.$get();
-      if (!res.ok) {
-        console.error("Failed to fetch servers: ", res.status);
-        return [];
-      }
-      const data = await res.json();
-      // TODO: Remove this debug log in production
-      console.log("API Response:", data);
-
-      // Ensure the response has the expected structure
-      if (data && typeof data === 'object' && 'servers' in data && Array.isArray(data.servers)) {
-        return data.servers as ServerType[];
-      }
-
-      console.error("Unexpected API response structure:", data);
-      return [];
-    } catch (e) {
-      console.error("Failed to fetch servers", e);
-      return [];
-    }
+  const api = useMemo(() => {
+    return token ? createApi(token) : null;
   }, [token]);
 
+  const fetchServers = react.useCallback(async () => {
+    if (!api) return [];
+
+    try {
+      const res = await api.server.getservers.$get();
+      if (!res.ok) {
+        console.error('Failed to fetch servers:', res.statusText);
+        return [];
+      }
+
+      const data = await res.json();
+      if (data && typeof data === 'object' && 'servers' in data && Array.isArray(data.servers)) {
+        return data.servers as ServerType[];
+      };
+
+      console.error('Unexpected response format:', data);
+      return [];
+    } catch (error) {
+      console.error('Error fetching servers:', error);
+      return [];
+    }
+  }, [api]);
   react.useEffect(() => {
     const fetchToken = async () => {
       const token = await getToken({});
@@ -70,8 +69,6 @@ function RouteComponent() {
     }
     loadServers();
   }, [token, fetchServers]);
-
-
   const onCompleteHandler = async () => {
     const servers = await fetchServers();
     setServers(servers);
@@ -94,8 +91,8 @@ function RouteComponent() {
             {/* sidebar */}
             <div className='py-2 absolute flex flex-col h-screen w-[65px] bg-zinc-600 left-0  overflow-hidden'>
               {/* Plus icon */}
-              <button className='mb-2 w-full h-14 bg-transparent flex items-center justify-center p-0 ' 
-              onClick={() => setShowServerDialogue(true)}>
+              <button className='mb-2 w-full h-14 bg-transparent flex items-center justify-center p-0 '
+                onClick={() => setShowServerDialogue(true)}>
                 <Plus size={42} className='text-white hover:text-blue-400 transition-all duration-200 cursor-pointer' />
               </button>
               <div className='h- bg-white rounded-2xl w-3/4 mb-3 place-self-center' />
