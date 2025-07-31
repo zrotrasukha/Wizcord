@@ -13,9 +13,10 @@ import type { ServerType } from '@server/src/types/server.type'
 type ServerDialogueProps = {
   onComplete: () => void;
   setShowServerDialogue: React.Dispatch<React.SetStateAction<boolean>>;
+  onCancel: () => void;
 }
 
-export default function ServerDialogue({ onComplete, setShowServerDialogue }: ServerDialogueProps) {
+export default function ServerDialogue({ onComplete, setShowServerDialogue, onCancel}: ServerDialogueProps) {
 
   const [tabField, setTabField] = useState('create');
   const [joinServerLink, setJoinServerLink] = useState('');
@@ -93,7 +94,7 @@ export default function ServerDialogue({ onComplete, setShowServerDialogue }: Se
   }, [token, isSignedIn, getToken, setToken]);
 
   return (
-    <div className='bg-zinc-900 h-screen flex items-center justify-center'
+    <div className='inset-0 fixed bg-black/50 flex justify-center items-center z-50'
       onClick={handleBackgroundClick}>
       <Card className='flex flex-col w-[400px] h-fit justify-center items-center relative'>
         <Cross
@@ -102,7 +103,7 @@ export default function ServerDialogue({ onComplete, setShowServerDialogue }: Se
           onClick={() => setShowServerDialogue(false)}
         />
         <Button onClick={getServers}>getServers</Button>
-        <SelectFieldTab value={tabField} onValueChange={setTabField}  />
+        <SelectFieldTab value={tabField} onValueChange={setTabField} />
         {tabField === 'create' ? (
           <div className='w-full px-4'>
             <Label
@@ -117,10 +118,18 @@ export default function ServerDialogue({ onComplete, setShowServerDialogue }: Se
               id='server-name'
               placeholder='Enter server name'
               className='italic' />
-            <CardFooter className='flex w-full items-center justify-end p-0 mt-2'>
+            <CardFooter className='flex w-full items-center justify-end p-0 mt-2 gap-2'>
+              <Button 
+                variant="outline"
+                className="w-1/2"
+                onClick={onCancel}
+              >
+                Cancel
+              </Button>
               <Button
                 onClick={handleCreateServer}
                 disabled={loading || !servername.trim()}
+                className="w-1/2"
               >
                 {loading ? 'Creating...' : 'Create'}
               </Button>
@@ -136,8 +145,20 @@ export default function ServerDialogue({ onComplete, setShowServerDialogue }: Se
               placeholder='Enter invite link'
               className='italic'
             />
-            <CardFooter className='flex w-full items-center justify-end p-0 mt-2'>
-              <Button disabled={!joinServerLink}>Join</Button>
+            <CardFooter className='flex w-full items-center justify-end p-0 mt-2 gap-2'>
+              <Button 
+                variant="outline"
+                className="w-1/2"
+                onClick={onCancel}
+              >
+                Cancel
+              </Button>
+              <Button 
+                disabled={!joinServerLink}
+                className='w-1/2'
+              >
+                Join
+              </Button>
             </CardFooter>
           </div>
         )}
