@@ -1,5 +1,5 @@
-import { createFileRoute } from '@tanstack/react-router'
-import react, { useMemo } from 'react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState, useEffect, useCallback, useMemo, createContext } from 'react'
 import { useAuth } from '@clerk/clerk-react'
 import ServerDialogue from '@/components/serverDialogue'
 import { createApi } from '@/lib/api'
@@ -15,21 +15,24 @@ type contextType = {
   setToken: React.Dispatch<React.SetStateAction<string>>;
 };
 
-export const TokenContext = react.createContext<contextType | null>(null);
+export const TokenContext = createContext<contextType | null>(null);
 
 function RouteComponent() {
   const { getToken, isSignedIn } = useAuth();
-  const [token, setToken] = react.useState('');
-  const [isLoading, setIsLoading] = react.useState(true);
-  const [servers, setServers] = react.useState<ServerType[] | null>([]);
-  const [showServerDialogue, setShowServerDialogue] = react.useState(false);
+  const [token, setToken] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [servers, setServers] = useState<ServerType[] | null>([]);
+  const [showServerDialogue, setShowServerDialogue] = useState(false);
 
+  const onCancel = () => {
+    setShowServerDialogue(false);
+  }
 
   const api = useMemo(() => {
     return token ? createApi(token) : null;
   }, [token]);
 
-  const fetchServers = react.useCallback(async () => {
+  const fetchServers = useCallback(async () => {
     if (!api) return [];
 
     try {
@@ -51,7 +54,12 @@ function RouteComponent() {
       return [];
     }
   }, [api]);
-  react.useEffect(() => {
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    if(!isSignedIn) {
+      navigate({to: '/signin'});      
+    }
     const fetchToken = async () => {
       const token = await getToken({});
       setToken(token || '');
@@ -59,7 +67,7 @@ function RouteComponent() {
     fetchToken();
   }, [getToken, isSignedIn]);
 
-  react.useEffect(() => {
+  useEffect(() => {
     if (!token) return;
     setIsLoading(true);
     const loadServers = async () => {
@@ -81,22 +89,18 @@ function RouteComponent() {
   return (
     <>
       <TokenContext.Provider value={{ token, setToken }}>
-        {/* Server Creation Dialog */}
-        {showServerDialogue ? (
-          <ServerDialogue
-            onComplete={onCompleteHandler}
-            setShowServerDialogue={setShowServerDialogue}
-          />
-        ) : (
-          // sidebar
-          (
-            <div className='h-screen w-screen bg-zinc-950 flex relative'>
-              <Sidebar servers={servers} setShowServerDialogue={setShowServerDialogue} />
-              {/* second sidebar */}
-              <SecondSidebar server={servers![0]}/>
-            </div>
-          )
-        )}
+        <div className='h-screen w-screen bg-zinc-950 flex relative'>
+          <Sidebar servers={servers} setShowServerDialogue={setShowServerDialogue} />
+          <SecondSidebar server={servers![0]} />
+          {/* Server Creation Dialog */}
+          {showServerDialogue && (
+            <ServerDialogue
+              onComplete={onCompleteHandler}
+              setShowServerDialogue={setShowServerDialogue}
+              onCancel={onCancel}
+            />
+          )}
+        </div>
       </TokenContext.Provider>
     </>
   )
