@@ -1,5 +1,5 @@
 import type { ServerType, ChannelType, Category } from "@/types/app.types";
-import { useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import MainDropDown from "@/components/MainDropDown";
 import { ChevronDown, ChevronRight, Hash, Volume2, Plus } from "lucide-react";
 
@@ -24,10 +24,18 @@ const fakeChannels: ChannelType[] = [
   { id: '5', name: 'lounge', type: 'voice', serverId: "b1e2c3d4-e5f6-7890-abcd-1234567890ef", categoryId: 'cat3' }
 ]
 
+type showChannelContextType = {
+  showChannelCreateDialogue: boolean,
+  setShowChannelCreateDialogue: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+const showChannelContext = createContext<showChannelContextType | null>(null);
 const SecondSidebar = ({ server, selectedChannel, onChannelSelect }: SecondSidebarProps) => {
-  const [channels, setChannel] = useState<ChannelType[]>([]);
+  const [channels, setChannel] = useState<ChannelType[]>(fakeChannels);
   const [categories, setCategories] = useState<Category[]>(Categories);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+  const [showChannelCreateDialogue, setShowChannelCreateDialogue] = useState(false);
+  // Initialize categories based on the server
   useEffect(() => {
     setChannel(fakeChannels.filter((channel) => channel.serverId === server?.id))
   }, [server?.id]);
@@ -45,61 +53,64 @@ const SecondSidebar = ({ server, selectedChannel, onChannelSelect }: SecondSideb
     onChannelSelect(channel);
   }
   return (
-    <div className="bg-zinc-700 h-full flex flex-col w-80 rounded-r-xl overflow-hidden">
-      {/*Server Heading  */}
-      <div className="flex items-center justify-center p-4 bg-zinc-800 mb-4">
-        <MainDropDown triggerName={server?.name || 'No Server'} categories={categories} setCategories={setCategories} />
-      </div>
-      {/* Categories */}
-      <div className="flex-1 ">
-        {!server ? (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            <p>No server selected</p>
-          </div>
-        ) : (
-          categories.map((cat) => {
-            const isExpanded = expandedCategories.includes(cat.id);
-            const expandedChannels = channels.filter((ch) => {
-              return ch.categoryId === cat.id && ch.serverId === server?.id;
-            });
-            return (
-              <div key={cat.id} className="px-1">
-                <button
-                  key={cat.id}
-                  onClick={() => toggleCategory(cat.id)}
-                  className="flex items-center hover:text-white text-xs uppercase text-left px-4 py-1 cursor-pointer group text-zinc-300 w-full"
-                >
-                  {isExpanded ? (
-                    <ChevronDown className="text-gray-400 h-4" />
-                  ) : (
-                    <ChevronRight />
-                  )}
-                  <span>{cat.name}</span>
-                </button>
-                {isExpanded && (
-                  <div className="w-full mx-2 px-6">
-                    {expandedChannels.map((ch) => (
-                      <div key={ch.id}
-                        onClick={() => handleChannelClick(ch)}
-                      >
-                        <div className={`flex items-center h-7 rounded text-sm mb-2 text-gray-400 hover:bg-zinc-600 cursor-pointer px-2 ${selectedChannel?.id === ch.id ? 'bg-zinc-600 text-white' : ''}`}>
-                          {ch.type === 'text' ?
-                            <Hash className="mr-2 h-4" /> :
-                            <Volume2 className="mr-2 h-4" />}
-                          <span>{ch.name}</span>
-                          <Plus className="hidden hover:block hover:opacity-100 transition-opacity ml-auto" />
-                        </div>
-                      </div>
-                    )
+    <showChannelContext.Provider value={{ showChannelCreateDialogue, setShowChannelCreateDialogue }}>
+      <div className="bg-zinc-700 h-full flex flex-col w-80 rounded-r-xl overflow-hidden">
+        {/*Server Heading  */}
+        <div className="flex items-center justify-center p-4 bg-zinc-800 mb-4">
+          <MainDropDown triggerName={server?.name || 'No Server'} categories={categories} setCategories={setCategories} />
+        </div>
+        {/* Categories */}
+        <div className="flex-1 ">
+          {!server ? (
+            <div className="flex items-center justify-center h-full text-gray-400">
+              <p>No server selected</p>
+            </div>
+          ) : (
+            categories.map((cat) => {
+              const isExpanded = expandedCategories.includes(cat.id);
+              const expandedChannels = channels.filter((ch) => {
+                return ch.categoryId === cat.id && ch.serverId === server?.id;
+              });
+              return (
+                <div key={cat.id} className="px-1">
+                  <button
+                    key={cat.id}
+                    onClick={() => toggleCategory(cat.id)}
+                    className="flex items-center hover:text-white text-xs uppercase text-left px-4 py-1 cursor-pointer group text-zinc-300 w-full"
+                  >
+                    {isExpanded ? (
+                      <ChevronDown className="text-gray-400 h-4" />
+                    ) : (
+                      <ChevronRight />
                     )}
-                  </div>
-                )}
-              </div>
-            );
-          })
-        )}
+                    <span className="flex-1">{cat.name}</span>
+                    <Plus className="hidden group-hover:block h-4" />
+
+                  </button>
+                  {isExpanded && (
+                    <div className="w-full mx-2 px-6">
+                      {expandedChannels.map((ch) => (
+                        <div key={ch.id}
+                          onClick={() => handleChannelClick(ch)}
+                        >
+                          <div className={`flex items-center h-7 rounded text-sm mb-2 text-gray-400 hover:bg-zinc-600 cursor-pointer px-2 ${selectedChannel?.id === ch.id ? 'bg-zinc-600 text-white' : ''}`}>
+                            {ch.type === 'text' ?
+                              <Hash className="mr-2 h-4" /> :
+                              <Volume2 className="mr-2 h-4" />}
+                            <span>{ch.name}</span>
+                          </div>
+                        </div>
+                      )
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
-    </div>
+    </showChannelContext.Provider>
   )
 }
 
