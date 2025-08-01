@@ -1,6 +1,8 @@
 import { timestamp, pgTable, varchar, text, uuid, pgEnum } from "drizzle-orm/pg-core";
 
 export const roleEnum = pgEnum('role', ['ADMIN', 'MODERATOR', 'MEMBER']);
+export const channelType = pgEnum('channelType', ['text', 'voice']);
+export const visibility = pgEnum('visibility', ['public', 'private',]);
 
 export const user = pgTable(
   'users', {
@@ -8,8 +10,8 @@ export const user = pgTable(
   username: varchar('username', { length: 225 }).notNull(),
   email: varchar('email', { length: 225 }).notNull(),
   avatar: text('avatar').notNull(),
-  createdAt: timestamp('createdAt').defaultNow(),
-  updatedAt: timestamp('updatedAt').defaultNow()
+  createdAt: timestamp('createdAt', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).defaultNow()
 }
 )
 
@@ -20,8 +22,8 @@ export const server = pgTable(
   admin: text('admin').notNull().references(() => user.id),
   icon: text('icon'),
   description: text('description'),
-  createdAt: timestamp('createdAt').defaultNow(),
-  updatedAt: timestamp('updatedAt').defaultNow()
+  createdAt: timestamp('createdAt', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).defaultNow()
 }
 );
 
@@ -31,7 +33,38 @@ export const serverMember = pgTable(
   serverId: uuid('serverId').notNull().references(() => server.id),
   userId: text('userId').notNull().references(() => user.id),
   role: roleEnum().notNull().default('MEMBER'),
-  joinedAt: timestamp('joinedAt').defaultNow(),
-  updatedAt: timestamp('updatedAt').defaultNow()
+  joinedAt: timestamp('joinedAt', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).defaultNow()
+}
+)
+export const category = pgTable(
+  'category',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    visibility: visibility().notNull(),
+    name: varchar('channelName', { length: 150 }),
+    serverId: uuid('serverId').references(() => server.id).notNull(),
+    createdAt: timestamp('createdAt', { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp('updatedAt', { withTimezone: true }).defaultNow()
+  }
+)
+
+export const channel = pgTable(
+  'channels', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  serverId: uuid('serverId').references(() => server.id).notNull(),
+  type: channelType().notNull(),
+  categoryId: uuid('categoryId').references(() => category.id),
+  createdAt: timestamp('createdAt', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('createdAt', { withTimezone: true }).defaultNow()
+}
+)
+
+export const message = pgTable(
+  'messages', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  content: text().notNull(),
+  serverId: uuid('serverId').notNull().references(() => server.id),
+  channelId: uuid('channelId').references(() => channel.id).notNull()
 }
 )
