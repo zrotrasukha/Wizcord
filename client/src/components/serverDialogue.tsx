@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { createApi } from '@/lib/api'
 import { useAuth } from '@clerk/clerk-react'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { TokenContext } from '@/routes'
+import { MainContext } from '@/routes'
 import { RxCross2 as Cross } from "react-icons/rx";
 import type { ServerType } from '@server/src/types/server.type'
 
@@ -16,16 +16,16 @@ type ServerDialogueProps = {
   onCancel: () => void;
 }
 
-export default function ServerDialogue({ onComplete, setShowServerDialogue, onCancel}: ServerDialogueProps) {
+export default function ServerDialogue({ onComplete, setShowServerDialogue, onCancel }: ServerDialogueProps) {
 
   const [tabField, setTabField] = useState('create');
   const [joinServerLink, setJoinServerLink] = useState('');
   const [servername, setservername] = useState('');
   const [loading, setLoading] = useState(false);
   const { getToken, isSignedIn } = useAuth();
-  const ctx = useContext(TokenContext);
+  const ctx = useContext(MainContext);
 
-  if (!ctx) throw new Error('TokenContext is not provided');
+  if (!ctx) throw new Error('MainContext is not provided');
   const { token, setToken } = ctx;
 
   const api = useMemo(() => {
@@ -119,7 +119,7 @@ export default function ServerDialogue({ onComplete, setShowServerDialogue, onCa
               placeholder='Enter server name'
               className='italic' />
             <CardFooter className='flex w-full items-center justify-end p-0 mt-2 gap-2'>
-              <Button 
+              <Button
                 variant="outline"
                 className="w-1/2"
                 onClick={onCancel}
@@ -146,14 +146,14 @@ export default function ServerDialogue({ onComplete, setShowServerDialogue, onCa
               className='italic'
             />
             <CardFooter className='flex w-full items-center justify-end p-0 mt-2 gap-2'>
-              <Button 
+              <Button
                 variant="outline"
                 className="w-1/2"
                 onClick={onCancel}
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 disabled={!joinServerLink}
                 className='w-1/2'
               >
