@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TokenRouteImport } from './routes/token'
 import { Route as SigninRouteImport } from './routes/signin'
+import { Route as CrudeRouteImport } from './routes/crude'
 import { Route as IndexRouteImport } from './routes/index'
 
 const TokenRoute = TokenRouteImport.update({
@@ -23,6 +24,11 @@ const SigninRoute = SigninRouteImport.update({
   path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CrudeRoute = CrudeRouteImport.update({
+  id: '/crude',
+  path: '/crude',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -31,30 +37,34 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/crude': typeof CrudeRoute
   '/signin': typeof SigninRoute
   '/token': typeof TokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/crude': typeof CrudeRoute
   '/signin': typeof SigninRoute
   '/token': typeof TokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/crude': typeof CrudeRoute
   '/signin': typeof SigninRoute
   '/token': typeof TokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/signin' | '/token'
+  fullPaths: '/' | '/crude' | '/signin' | '/token'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/signin' | '/token'
-  id: '__root__' | '/' | '/signin' | '/token'
+  to: '/' | '/crude' | '/signin' | '/token'
+  id: '__root__' | '/' | '/crude' | '/signin' | '/token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CrudeRoute: typeof CrudeRoute
   SigninRoute: typeof SigninRoute
   TokenRoute: typeof TokenRoute
 }
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/crude': {
+      id: '/crude'
+      path: '/crude'
+      fullPath: '/crude'
+      preLoaderRoute: typeof CrudeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CrudeRoute: CrudeRoute,
   SigninRoute: SigninRoute,
   TokenRoute: TokenRoute,
 }
