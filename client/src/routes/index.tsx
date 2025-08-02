@@ -8,16 +8,13 @@ import Sidebar from '@/components/sidebar'
 import SecondSidebar from '@/components/secondSidebar'
 import ChatBox from '@/components/ChatBox'
 import { LoadingPage } from '@/components/ui/loading'
+import type { contextType } from '@/types/context.type'
+import { CreateChannelDialogue } from '@/components/createChannelDialogue'
 
 export const Route = createFileRoute('/')({
   component: RouteComponent,
 })
-type contextType = {
-  token: string;
-  setToken: React.Dispatch<React.SetStateAction<string>>;
-};
 
-export const TokenContext = createContext<contextType | null>(null);
 
 const mockMessages: MessageType[] = [
   {
@@ -56,6 +53,9 @@ const mockMessages: MessageType[] = [
     channelId: '4', // announcements
   },
 ]
+
+export const MainContext = createContext<contextType | null>(null);
+
 function RouteComponent() {
   const { getToken, isSignedIn } = useAuth();
   const [token, setToken] = useState('');
@@ -64,6 +64,7 @@ function RouteComponent() {
   const [showServerDialogue, setShowServerDialogue] = useState(false);
   const [selectSelectedChannel, setSelectedChannel] = useState<ChannelType | null>(null);
   const [messages, setMessages] = useState<MessageType[]>(mockMessages);
+  const [showChannelCreateDialogue, setShowChannelCreateDialogue] = useState(false);
   const onCancel = () => {
     setShowServerDialogue(false);
   }
@@ -147,7 +148,7 @@ function RouteComponent() {
   }
   return (
     <>
-      <TokenContext.Provider value={{ token, setToken }}>
+      <MainContext.Provider value={{ token, setToken, setShowChannelCreateDialogue, showChannelCreateDialogue }}>
         <div className='h-screen w-screen bg-zinc-950 flex relative'>
           <Sidebar servers={servers} setShowServerDialogue={setShowServerDialogue} />
           {servers && servers.length > 0 ? (
@@ -175,8 +176,10 @@ function RouteComponent() {
               onCancel={onCancel}
             />
           )}
+          {/* Channel Creation Dialog */}
+          {showChannelCreateDialogue && (<CreateChannelDialogue />)}
         </div>
-      </TokenContext.Provider>
+      </MainContext.Provider>
     </>
   )
 }
