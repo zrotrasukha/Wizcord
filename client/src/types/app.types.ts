@@ -19,7 +19,7 @@ export interface Category {
 export interface ChannelType {
   id: string;
   name: string;
-  type: 'text' | 'voice';
+  type: string;
   serverId: string;
   categoryId: string;
 }
@@ -37,4 +37,15 @@ export interface SecondSidebarProps {
   server: ServerType | null;
   selectedChannel: ChannelType | null;
   onChannelSelect: (channel: ChannelType) => void;
+  channels: ChannelType[];
+  setChannels: React.Dispatch<React.SetStateAction<ChannelType[]>>;
+}
+
+
+export interface CreateChannelDialogueProps {
+  onComplete: () => void; 
+  onCancel: () => void;
+  categoryId?: string; // Optional! If provided = assign to category, if not = orphan
+  serverId: string;
+  onChannelCreate: (channel: ChannelType) => void;
 }
