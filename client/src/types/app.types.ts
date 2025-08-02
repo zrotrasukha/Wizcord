@@ -31,3 +31,10 @@ export interface MessageType {
   timestamp: Date;
   channelId: string;
 }
+
+
+export interface SecondSidebarProps {
+  server: ServerType | null;
+  selectedChannel: ChannelType | null;
+  onChannelSelect: (channel: ChannelType) => void;
+}
