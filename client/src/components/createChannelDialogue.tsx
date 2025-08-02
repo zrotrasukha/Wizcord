@@ -12,14 +12,35 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useContext, useState } from 'react';
 import { MainContext } from '@/routes';
+import type { ChannelType } from '@/types/app.types';
 
-export const CreateChannelDialogue = () => {
-  const [selectedValue, setSelectedValue] = useState<string | undefined>();
+interface CreateChannelDialogueProps {
+  onComplete: () => void;
+  onCancel: () => void;
+  onChannelCreate: (channel: ChannelType) => void;
+}
+
+export const CreateChannelDialogue = (props: CreateChannelDialogueProps) => {
+  const [selectedValue, setSelectedValue] = useState<string>('text');
   const [channelName, setChannelName] = useState<string>('');
+
 
   const ctx = useContext(MainContext)
   if (!ctx) throw new Error("Show channel Context doesn't exist");
-  const { setShowChannelCreateDialogue } = ctx;
+
+  const { channelCreationContext, setShowChannelCreateDialogue } = ctx;
+
+  const handleSubmit = () => {
+    const newChannel: ChannelType= {
+      id: crypto.randomUUID(),
+      name: channelName.trim(),
+      type: selectedValue || 'text',
+      serverId: ctx.channelCreationContext?.serverId || '',
+      categoryId: channelCreationContext?.categoryId || '',
+    }
+    props.onChannelCreate(newChannel);
+    props.onComplete();
+  }
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
       <div className="bg-white rounded-lg p-0 w-[400px] shadow-xl">
@@ -32,6 +53,7 @@ export const CreateChannelDialogue = () => {
           </CardHeader>
 
           <CardContent className="flex flex-col gap-3">
+
             <Label htmlFor="channelType" className="text-xs text-gray-700/40">
               Select channel Type
             </Label>
@@ -44,8 +66,8 @@ export const CreateChannelDialogue = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="Text">Text</SelectItem>
-                  <SelectItem value="Voice">Voice</SelectItem>
+                  <SelectItem value="voice">Voice</SelectItem>
+                  <SelectItem value="text">Text</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -66,7 +88,9 @@ export const CreateChannelDialogue = () => {
               >
                 Cancel
               </Button>
-              <Button>Join</Button>
+              <Button type='submit'
+                onClick={handleSubmit}
+              >Create</Button>
             </div>
           </CardContent>
         </Card>
