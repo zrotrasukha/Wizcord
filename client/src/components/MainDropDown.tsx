@@ -8,10 +8,12 @@ import {
 } from "@/components/ui/dropdown-menu"
 import CreateCategory from "./createCategory";
 import { FaChevronDown as Down } from "react-icons/fa";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import type { Category } from "@/types/app.types";
+import { MainContext } from "@/routes";
 
 interface MainDropDownProps {
+  serverId: string; 
   triggerName: string;
   categories: Category[];
   setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
@@ -24,6 +26,15 @@ export default function MainDropDown(props: MainDropDownProps) {
   const handleCreateCategoryComplete = () => {
     setCreateCategory(false);
   };
+  
+  const ctx = useContext(MainContext);
+  if(!ctx) throw new Error("MainContext is not available");
+  const { setShowChannelCreateDialogue, setChannelCreationContext } = ctx;
+
+  const handleCreateOrphanChannel = () => {
+    setShowChannelCreateDialogue(true)
+    setChannelCreationContext({serverId: props.serverId}) 
+  }
   return (
     <>
       <DropdownMenu>
@@ -41,10 +52,12 @@ export default function MainDropDown(props: MainDropDownProps) {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem onClick={() => { setCreateCategory(true) }}
+            <DropdownMenuItem 
             >Create Category
             </DropdownMenuItem>
-            <DropdownMenuItem >
+            <DropdownMenuItem 
+              onClick={() => { handleCreateOrphanChannel() }}
+            >
               Create Channel
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -54,10 +67,12 @@ export default function MainDropDown(props: MainDropDownProps) {
       {/* Create Category Dialog */}
       {createCategory && (
         <CreateCategory
+
           setCategories={props.setCategories}
           onComplete={handleCreateCategoryComplete}
           onCancel={handleCreateCategoryComplete}
           categories={props.categories}
+
         />
       )}
     </>
