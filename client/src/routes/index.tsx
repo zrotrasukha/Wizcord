@@ -10,49 +10,11 @@ import ChatBox from '@/components/ChatBox'
 import { LoadingPage } from '@/components/ui/loading'
 import type { contextType } from '@/types/context.type'
 import { CreateChannelDialogue } from '@/components/createChannelDialogue'
+import { fakeChannels, mockMessages } from '@/lib/mock'
 
 export const Route = createFileRoute('/')({
   component: RouteComponent,
 })
-
-
-const mockMessages: MessageType[] = [
-  {
-    id: 'msg-1',
-    content: 'yo what’s up',
-    author: 'shivang',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 1), // 1 hour ago
-    channelId: '1', // general
-  },
-  {
-    id: 'msg-2',
-    content: 'did you deploy the build?',
-    author: 'elon',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    channelId: '1', // general
-  },
-  {
-    id: 'msg-3',
-    content: 'production is 🔥 again',
-    author: 'grug',
-    timestamp: new Date(Date.now() - 1000 * 60 * 20), // 20 mins ago
-    channelId: '2', // random
-  },
-  {
-    id: 'msg-4',
-    content: 'bruh it crashed again',
-    author: 'cat_gpt',
-    timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 mins ago
-    channelId: '2', // random
-  },
-  {
-    id: 'msg-5',
-    content: 'lol nice try',
-    author: 'hackerMan',
-    timestamp: new Date(), // now
-    channelId: '4', // announcements
-  },
-]
 
 export const MainContext = createContext<contextType | null>(null);
 
@@ -65,6 +27,12 @@ function RouteComponent() {
   const [selectSelectedChannel, setSelectedChannel] = useState<ChannelType | null>(null);
   const [messages, setMessages] = useState<MessageType[]>(mockMessages);
   const [showChannelCreateDialogue, setShowChannelCreateDialogue] = useState(false);
+  const [channels, setChannels] = useState<ChannelType[]>(fakeChannels);
+  const [channelCreationContext, setChannelCreationContext] = useState<{
+    categoryId?: string;
+    serverId: string;
+  } | null>(null);
+
   const onCancel = () => {
     setShowServerDialogue(false);
   }
@@ -146,14 +114,35 @@ function RouteComponent() {
     // Here you would typically send the message to the server
     setMessages((prev) => [...prev, newMessage]);
   }
+
+  const handleChannelCreate = (newChannel: ChannelType) => {
+    setChannels((prev) => [...prev, newChannel]);
+    setShowChannelCreateDialogue(false);
+    setChannelCreationContext(null);
+  }
+
+  const handleChannelCancel = () => {
+    setShowChannelCreateDialogue(false);
+    setChannelCreationContext(null);
+  }
+
   return (
     <>
-      <MainContext.Provider value={{ token, setToken, setShowChannelCreateDialogue, showChannelCreateDialogue }}>
+      <MainContext.Provider value={{
+        token,
+        setToken,
+        showChannelCreateDialogue,
+        setShowChannelCreateDialogue,
+        channelCreationContext,
+        setChannelCreationContext
+      }}>
         <div className='h-screen w-screen bg-zinc-950 flex relative'>
           <Sidebar servers={servers} setShowServerDialogue={setShowServerDialogue} />
           {servers && servers.length > 0 ? (
             <>
               <SecondSidebar
+                channels={channels}
+                setChannels={setChannels}
                 server={servers[0]}
                 selectedChannel={selectSelectedChannel}
                 onChannelSelect={setSelectedChannel} />
@@ -165,7 +154,7 @@ function RouteComponent() {
             </>
           ) : (
             <div className="flex items-center justify-center h-full text-gray-400">
-              <p>No server selected</p>
+              <p>No server selected. Servers: {servers?.length || 0}</p>
             </div>
           )}
           {/* Server Creation Dialog */}
@@ -177,7 +166,13 @@ function RouteComponent() {
             />
           )}
           {/* Channel Creation Dialog */}
-          {showChannelCreateDialogue && (<CreateChannelDialogue />)}
+          {showChannelCreateDialogue && (
+            <CreateChannelDialogue
+              onChannelCreate={handleChannelCreate}
+              onCancel={handleChannelCancel}
+              onComplete={handleChannelCancel}
+            />
+          )}
         </div>
       </MainContext.Provider>
     </>
