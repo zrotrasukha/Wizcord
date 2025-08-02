@@ -86,19 +86,18 @@ const SecondSidebar = ({ server, selectedChannel, onChannelSelect }: SecondSideb
                     <span className="flex-1">{cat.name}</span>
                     <Plus className="hidden group-hover:block h-4" />
 
-                  </button>
-                  {isExpanded && (
-                    <div className="w-full mx-2 px-6">
-                      {expandedChannels.map((ch) => (
-                        <div key={ch.id}
-                          onClick={() => handleChannelClick(ch)}
-                        >
-                          <div className={`flex items-center h-7 rounded text-sm mb-2 text-gray-400 hover:bg-zinc-600 cursor-pointer px-2 ${selectedChannel?.id === ch.id ? 'bg-zinc-600 text-white' : ''}`}>
-                            {ch.type === 'text' ?
-                              <Hash className="mr-2 h-4" /> :
-                              <Volume2 className="mr-2 h-4" />}
-                            <span>{ch.name}</span>
-                          </div>
+                </button>
+                {isExpanded && (
+                  <div className="w-full mx-2 px-6">
+                    {expandedChannels.map((ch) => (
+                      <div key={ch.id}
+                        onClick={() => handleChannelClick(ch)}
+                      >
+                        <div className={`flex items-center h-7 rounded text-sm mb-2 text-gray-400 hover:bg-zinc-600 cursor-pointer px-2 ${selectedChannel?.id === ch.id ? 'bg-zinc-600 text-white' : ''}`}>
+                          {ch.type === 'text' ?
+                            <Hash className="mr-2 h-4" /> :
+                            <Volume2 className="mr-2 h-4" />}
+                          <span>{ch.name}</span>
                         </div>
                       )
                       )}
