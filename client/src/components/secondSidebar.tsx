@@ -1,40 +1,17 @@
-import type { ServerType, ChannelType, Category } from "@/types/app.types";
-import { createContext, useEffect, useState } from "react";
+import type { SecondSidebarProps, ChannelType, Category } from "@/types/app.types";
+import { useContext, useEffect, useState } from "react";
 import MainDropDown from "@/components/MainDropDown";
 import { ChevronDown, ChevronRight, Hash, Volume2, Plus } from "lucide-react";
+import { MainContext } from "@/routes";
+import { Categories, fakeChannels } from "@/lib/mock";
 
-interface SecondSidebarProps {
-  server: ServerType | null;
-  selectedChannel: ChannelType | null;
-  onChannelSelect: (channel: ChannelType) => void;
-}
-
-
-const Categories: Category[] = [
-  { id: 'cat1', name: 'Text Channels', serverId: "03e64685-b993-4f3d-9c9c-26bc24ae2e15" },
-  { id: 'cat2', name: 'Voice Channels', serverId: "03e64685-b993-4f3d-9c9c-26bc24ae2e15" },
-  { id: 'cat3', name: 'General', serverId: "b1e2c3d4-e5f6-7890-abcd-1234567890ef" }
-];
-
-const fakeChannels: ChannelType[] = [
-  { id: '1', name: 'general', type: 'text', serverId: "03e64685-b993-4f3d-9c9c-26bc24ae2e15", categoryId: 'cat1' },
-  { id: '2', name: 'random', type: 'text', serverId: "03e64685-b993-4f3d-9c9c-26bc24ae2e15", categoryId: 'cat1' },
-  { id: '3', name: 'music', type: 'voice', serverId: "03e64685-b993-4f3d-9c9c-26bc24ae2e15", categoryId: 'cat2' },
-  { id: '4', name: 'announcements', type: 'text', serverId: "b1e2c3d4-e5f6-7890-abcd-1234567890ef", categoryId: 'cat3' },
-  { id: '5', name: 'lounge', type: 'voice', serverId: "b1e2c3d4-e5f6-7890-abcd-1234567890ef", categoryId: 'cat3' }
-]
-
-type showChannelContextType = {
-  showChannelCreateDialogue: boolean,
-  setShowChannelCreateDialogue: React.Dispatch<React.SetStateAction<boolean>>
-}
-
-const showChannelContext = createContext<showChannelContextType | null>(null);
 const SecondSidebar = ({ server, selectedChannel, onChannelSelect }: SecondSidebarProps) => {
   const [channels, setChannel] = useState<ChannelType[]>(fakeChannels);
   const [categories, setCategories] = useState<Category[]>(Categories);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
-  const [showChannelCreateDialogue, setShowChannelCreateDialogue] = useState(false);
+  const ctx = useContext(MainContext);
+  if (!ctx) return null;
+  const { setShowChannelCreateDialogue } = ctx;
   // Initialize categories based on the server
   useEffect(() => {
     setChannel(fakeChannels.filter((channel) => channel.serverId === server?.id))
@@ -53,38 +30,42 @@ const SecondSidebar = ({ server, selectedChannel, onChannelSelect }: SecondSideb
     onChannelSelect(channel);
   }
   return (
-    <showChannelContext.Provider value={{ showChannelCreateDialogue, setShowChannelCreateDialogue }}>
-      <div className="bg-zinc-700 h-full flex flex-col w-80 rounded-r-xl overflow-hidden">
-        {/*Server Heading  */}
-        <div className="flex items-center justify-center p-4 bg-zinc-800 mb-4">
-          <MainDropDown triggerName={server?.name || 'No Server'} categories={categories} setCategories={setCategories} />
-        </div>
-        {/* Categories */}
-        <div className="flex-1 ">
-          {!server ? (
-            <div className="flex items-center justify-center h-full text-gray-400">
-              <p>No server selected</p>
-            </div>
-          ) : (
-            categories.map((cat) => {
-              const isExpanded = expandedCategories.includes(cat.id);
-              const expandedChannels = channels.filter((ch) => {
-                return ch.categoryId === cat.id && ch.serverId === server?.id;
-              });
-              return (
-                <div key={cat.id} className="px-1">
-                  <button
-                    key={cat.id}
-                    onClick={() => toggleCategory(cat.id)}
-                    className="flex items-center hover:text-white text-xs uppercase text-left px-4 py-1 cursor-pointer group text-zinc-300 w-full"
-                  >
-                    {isExpanded ? (
-                      <ChevronDown className="text-gray-400 h-4" />
-                    ) : (
-                      <ChevronRight />
-                    )}
-                    <span className="flex-1">{cat.name}</span>
-                    <Plus className="hidden group-hover:block h-4" />
+    <div className="bg-zinc-700 h-full flex flex-col w-80 rounded-r-xl overflow-hidden">
+      {/*Server Heading  */}
+      <div className="flex items-center justify-center p-4 bg-zinc-800 mb-4">
+        <MainDropDown triggerName={server?.name || 'No Server'} categories={categories} setCategories={setCategories} />
+      </div>
+      {/* Categories */}
+      <div className="flex-1 ">
+        {!server ? (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            <p>No server selected</p>
+          </div>
+        ) : (
+          categories.map((cat) => {
+            const isExpanded = expandedCategories.includes(cat.id);
+            const expandedChannels = channels.filter((ch) => {
+              return ch.categoryId === cat.id && ch.serverId === server?.id;
+            });
+            return (
+              <div key={cat.id} className="px-1">
+                <button
+                  key={cat.id}
+                  onClick={() => toggleCategory(cat.id)}
+                  className="flex items-center hover:text-white text-xs uppercase text-left px-4 py-1 cursor-pointer group text-zinc-300 w-full"
+                >
+                  {isExpanded ? (
+                    <ChevronDown className="text-gray-400 h-4" />
+                  ) : (
+                    <ChevronRight />
+                  )}
+                  <span className="flex-1">{cat.name}</span>
+                  <Plus className="hidden group-hover:block h-4"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowChannelCreateDialogue(true)
+                    }}
+                  />
 
                 </button>
                 {isExpanded && (
@@ -99,17 +80,17 @@ const SecondSidebar = ({ server, selectedChannel, onChannelSelect }: SecondSideb
                             <Volume2 className="mr-2 h-4" />}
                           <span>{ch.name}</span>
                         </div>
-                      )
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })
-          )}
-        </div>
+                      </div>
+                    )
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
-    </showChannelContext.Provider>
+    </div>
   )
 }
 
