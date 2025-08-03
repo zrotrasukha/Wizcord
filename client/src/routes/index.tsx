@@ -1,9 +1,8 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, useEffect, useCallback, useMemo, createContext } from 'react'
-import { useAuth } from '@clerk/clerk-react'
+import { createFileRoute } from '@tanstack/react-router'
+import { useState, useMemo, createContext } from 'react'
 import ServerDialogue from '@/components/serverDialogue'
 import { createApi } from '@/lib/api'
-import type { ChannelType, MessageType, ServerType } from '@/types/app.types'
+import type { ChannelType, MessageType } from '@/types/app.types'
 import Sidebar from '@/components/sidebar'
 import SecondSidebar from '@/components/secondSidebar'
 import ChatBox from '@/components/ChatBox'
@@ -11,6 +10,8 @@ import { LoadingPage } from '@/components/ui/loading'
 import type { contextType } from '@/types/context.type'
 import { CreateChannelDialogue } from '@/components/createChannelDialogue'
 import { fakeChannels, mockMessages } from '@/lib/mock'
+import { useAuthToken } from '@/hooks/useAuth'
+import { useServer } from '@/hooks/useServer'
 
 export const Route = createFileRoute('/')({
   component: RouteComponent,
@@ -19,10 +20,8 @@ export const Route = createFileRoute('/')({
 export const MainContext = createContext<contextType | null>(null);
 
 function RouteComponent() {
-  const { getToken, isSignedIn } = useAuth();
-  const [token, setToken] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [servers, setServers] = useState<ServerType[] | null>([]);
+  const token = useAuthToken();
+  const [isLoading] = useState(true);
   const [showServerDialogue, setShowServerDialogue] = useState(false);
   const [selectSelectedChannel, setSelectedChannel] = useState<ChannelType | null>(null);
   const [messages, setMessages] = useState<MessageType[]>(mockMessages);
@@ -33,63 +32,17 @@ function RouteComponent() {
     serverId: string;
   } | null>(null);
 
-  const onCancel = () => {
-    setShowServerDialogue(false);
-  }
 
   const api = useMemo(() => {
     return token ? createApi(token) : null;
   }, [token]);
 
-  const fetchServers = useCallback(async () => {
-    if (!api) return [];
-
-    try {
-      const res = await api.server.getservers.$get();
-      if (!res.ok) {
-        console.error('Failed to fetch servers:', res.statusText);
-        return [];
-      }
-
-      const data = await res.json();
-      if (data && typeof data === 'object' && 'servers' in data && Array.isArray(data.servers)) {
-        return data.servers as ServerType[];
-      };
-
-      console.error('Unexpected response format:', data);
-      return [];
-    } catch (error) {
-      console.error('Error fetching servers:', error);
-      return [];
-    }
-  }, [api]);
-
-  const navigate = useNavigate();
-  useEffect(() => {
-    if (!isSignedIn) {
-      navigate({ to: '/signin' });
-    }
-    const fetchToken = async () => {
-      const token = await getToken({});
-      setToken(token || '');
-    }
-    fetchToken();
-  }, [getToken, isSignedIn]);
-
-  useEffect(() => {
-    if (!token) return;
-    setIsLoading(true);
-    const loadServers = async () => {
-      const servers = await fetchServers();
-      setServers(servers as ServerType[]);
-      setShowServerDialogue(servers.length === 0);
-      setIsLoading(false);
-    }
-    loadServers();
-  }, [token, fetchServers]);
+  const { servers, setServers } = useServer({ api, token });
+  const onCancel = () => {
+    setShowServerDialogue(false);
+  }
 
   const onCompleteHandler = async () => {
-    const servers = await fetchServers();
     setServers(servers);
     setShowServerDialogue(false);
   }
@@ -130,7 +83,6 @@ function RouteComponent() {
     <>
       <MainContext.Provider value={{
         token,
-        setToken,
         showChannelCreateDialogue,
         setShowChannelCreateDialogue,
         channelCreationContext,
