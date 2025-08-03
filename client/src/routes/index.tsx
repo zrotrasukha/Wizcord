@@ -20,8 +20,7 @@ export const Route = createFileRoute('/')({
 export const MainContext = createContext<contextType | null>(null);
 
 function RouteComponent() {
-  const token = useAuthToken();
-  const [isLoading] = useState(true);
+  const { token,setToken, isLoading: isAuthLoading, isSignedIn } = useAuthToken();
   const [showServerDialogue, setShowServerDialogue] = useState(false);
   const [selectSelectedChannel, setSelectedChannel] = useState<ChannelType | null>(null);
   const [messages, setMessages] = useState<MessageType[]>(mockMessages);
@@ -32,22 +31,23 @@ function RouteComponent() {
     serverId: string;
   } | null>(null);
 
+  const api = useMemo(() => token ? createApi(token) : null, [token]);
+  const { servers, isServerLoading, refreshServers } = useServer({ api, token });
 
-  const api = useMemo(() => {
-    return token ? createApi(token) : null;
-  }, [token]);
-
-  const { servers, setServers } = useServer({ api, token });
   const onCancel = () => {
     setShowServerDialogue(false);
   }
 
   const onCompleteHandler = async () => {
-    setServers(servers);
+    await refreshServers();
     setShowServerDialogue(false);
   }
 
-  if (isLoading) {
+  if (isAuthLoading || isServerLoading) {
+    return <LoadingPage />
+  }
+
+  if (!isSignedIn) {
     return <LoadingPage />
   }
 
@@ -83,6 +83,7 @@ function RouteComponent() {
     <>
       <MainContext.Provider value={{
         token,
+        setToken,
         showChannelCreateDialogue,
         setShowChannelCreateDialogue,
         channelCreationContext,
@@ -105,8 +106,10 @@ function RouteComponent() {
               />
             </>
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-400">
-              <p>No server selected. Servers: {servers?.length || 0}</p>
+            <div className="bg-zinc-700 h-full flex flex-col w-80 rounded-r-xl overflow-hidden">
+              <div className='flex items-center justify-center h-full text-gray-400 w-full '>
+                <p>No server selected. Servers</p>
+              </div>
             </div>
           )}
           {/* Server Creation Dialog */}
