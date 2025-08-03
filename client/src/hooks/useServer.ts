@@ -9,9 +9,9 @@ interface useServerProps {
 
 export const useServer = ({ api, token }: useServerProps) => {
 
-  const [servers, setServers] = useState<ServerType[] | null>([]);  // ✅ Start with empty array like working code
+  const [servers, setServers] = useState<ServerType[] | null>([]);
   const [isServerLoading, setIsServerLoading] = useState(true);
-  
+
   const fetchServers = useCallback(async () => {
     try {
       if (!api) return [];
@@ -23,7 +23,6 @@ export const useServer = ({ api, token }: useServerProps) => {
       }
 
       const data = await serverRes.json();
-      // ✅ Use lowercase 'servers' like your working code
       if (data && typeof data === 'object' && 'servers' in data && Array.isArray(data.servers)) {
         return data.servers as ServerType[];
       }
@@ -34,16 +33,13 @@ export const useServer = ({ api, token }: useServerProps) => {
       console.error('Error fetching servers:', error);
       return [];
     }
-  }, [api])  // ✅ Remove token from dependency since it's not used inside function
+  }, [api])
 
   useEffect(() => {
-    console.log('useServer: useEffect triggered, token:', token, 'api:', !!api);
     if (!token) return;
     setIsServerLoading(true);
     const loadServers = async () => {
-      console.log('useServer: About to fetch servers...');
       const servers = await fetchServers();
-      console.log('useServer: Fetched servers:', servers, 'Count:', servers.length);
       setServers(servers as ServerType[]);
       setIsServerLoading(false);
     }
@@ -54,7 +50,7 @@ export const useServer = ({ api, token }: useServerProps) => {
     if (!token) return;
     const servers = await fetchServers();
     setServers(servers as ServerType[]);
-  }, [fetchServers, token])  // ✅ Add token dependency since it's used here
+  }, [fetchServers, token])
 
 
   return { servers, isServerLoading, setServers, fetchServers, refreshServers }

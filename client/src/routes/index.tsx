@@ -20,7 +20,7 @@ export const Route = createFileRoute('/')({
 export const MainContext = createContext<contextType | null>(null);
 
 function RouteComponent() {
-  const { token,setToken, isLoading: isAuthLoading, isSignedIn } = useAuthToken();
+  const { token, setToken, isLoading: isAuthLoading, isSignedIn } = useAuthToken();
   const [showServerDialogue, setShowServerDialogue] = useState(false);
   const [selectSelectedChannel, setSelectedChannel] = useState<ChannelType | null>(null);
   const [messages, setMessages] = useState<MessageType[]>(mockMessages);
