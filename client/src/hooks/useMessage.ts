@@ -24,7 +24,7 @@ export function useMessages(selectedChannel: ChannelType | null) {
     setMessages(mockMessages)
   }, [selectedChannel])
 
-  const sendMessage = (message: string) => {
+  const sendMessageHandler = (message: string) => {
     if (!selectedChannel) return
 
     const newMessage: MessageType = {
@@ -36,14 +36,11 @@ export function useMessages(selectedChannel: ChannelType | null) {
     }
 
     setMessages((prev) => [...prev, newMessage])
-
-    // 🔥 Later: send to your backend/server
-    // sendToServer(newMessage)
   }
 
   return {
     messages,
-    sendMessage,
-    setMessages, // if you want to mutate externally (e.g. after fetching from backend)
+    sendMessageHandler,
+    setMessages,
   }
 }
