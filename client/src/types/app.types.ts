@@ -34,7 +34,7 @@ export interface MessageType {
 
 
 export interface SecondSidebarProps {
-  server: ServerType | null;
+  serverId: string;
   selectedChannel: ChannelType | null;
   onChannelSelect: (channel: ChannelType) => void;
   channels: ChannelType[];
@@ -43,7 +43,7 @@ export interface SecondSidebarProps {
 
 
 export interface CreateChannelDialogueProps {
-  onComplete: () => void; 
+  onComplete: () => void;
   onCancel: () => void;
   categoryId?: string; // Optional! If provided = assign to category, if not = orphan
   serverId: string;
