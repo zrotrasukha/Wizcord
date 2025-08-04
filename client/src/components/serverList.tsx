@@ -10,7 +10,10 @@ export const ServerList: React.FC<ServerListProps> = ({ servers }) => {
     <div>
       {servers?.map((server) => {
         return (
-          <div key={server.id} className='w-full h-14  flex items-center justify-center p-0 hover:bg-zinc-800 transition-colors cursor-pointer '>
+          <div key={server.id} className='w-full h-14  flex items-center justify-center p-0 hover:bg-zinc-800 transition-colors cursor-pointer group'
+            onClick={() => {
+
+            }}>
             {server.icon ? (
               <img
                 src={server.icon}
