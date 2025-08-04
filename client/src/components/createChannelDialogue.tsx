@@ -11,7 +11,7 @@ import { Label } from '@radix-ui/react-label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useContext, useState } from 'react';
-import { MainContext } from '@/routes';
+import { MainContext } from '@/providers/MainContext'
 import type { ChannelType } from '@/types/app.types';
 
 interface CreateChannelDialogueProps {
@@ -31,7 +31,7 @@ export const CreateChannelDialogue = (props: CreateChannelDialogueProps) => {
   const { channelCreationContext, setShowChannelCreateDialogue } = ctx;
 
   const handleSubmit = () => {
-    const newChannel: ChannelType= {
+    const newChannel: ChannelType = {
       id: crypto.randomUUID(),
       name: channelName.trim(),
       type: selectedValue || 'text',

@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { createApi } from '@/lib/api'
 import { useAuth } from '@clerk/clerk-react'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { MainContext } from '@/routes'
+import { MainContext } from '@/providers/MainContext'
 import { RxCross2 as Cross } from "react-icons/rx";
 import type { ServerType } from '@server/src/types/server.type'
 
