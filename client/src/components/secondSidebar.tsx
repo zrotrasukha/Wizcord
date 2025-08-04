@@ -2,7 +2,7 @@ import type { SecondSidebarProps, ChannelType, Category } from "@/types/app.type
 import { useContext, useEffect, useState } from "react";
 import MainDropDown from "@/components/MainDropDown";
 import { ChevronDown, ChevronRight, Hash, Volume2, Plus } from "lucide-react";
-import { MainContext } from "@/routes/index";
+import { MainContext } from "@/providers/MainContext";
 import { Categories, fakeChannels } from "@/lib/mock";
 
 const SecondSidebar = ({ server, selectedChannel, onChannelSelect, channels, setChannels }: SecondSidebarProps) => {
@@ -68,7 +68,7 @@ const SecondSidebar = ({ server, selectedChannel, onChannelSelect, channels, set
                 {orphanChannels.map((ch) => (
                   <div key={ch.id}
                     onClick={() => handleChannelClick(ch)}
-                      className="w-full px-4"
+                    className="w-full px-4"
                   >
                     <div className={`flex items-center h-7 rounded text-sm mb-2 text-gray-400 hover:bg-zinc-600 cursor-pointer px-2 ${selectedChannel?.id === ch.id ? 'bg-zinc-600 text-white' : ''}`}>
                       {ch.type === 'text' ?

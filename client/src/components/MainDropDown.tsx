@@ -10,10 +10,10 @@ import CreateCategory from "./createCategory";
 import { FaChevronDown as Down } from "react-icons/fa";
 import { useContext, useState } from "react";
 import type { Category } from "@/types/app.types";
-import { MainContext } from "@/routes";
+import { MainContext } from '@/providers/MainContext'
 
 interface MainDropDownProps {
-  serverId: string; 
+  serverId: string;
   triggerName: string;
   categories: Category[];
   setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
@@ -26,14 +26,14 @@ export default function MainDropDown(props: MainDropDownProps) {
   const handleCreateCategoryComplete = () => {
     setCreateCategory(false);
   };
-  
+
   const ctx = useContext(MainContext);
-  if(!ctx) throw new Error("MainContext is not available");
+  if (!ctx) throw new Error("MainContext is not available");
   const { setShowChannelCreateDialogue, setChannelCreationContext } = ctx;
 
   const handleCreateOrphanChannel = () => {
     setShowChannelCreateDialogue(true)
-    setChannelCreationContext({serverId: props.serverId}) 
+    setChannelCreationContext({ serverId: props.serverId })
   }
   return (
     <>
@@ -52,10 +52,10 @@ export default function MainDropDown(props: MainDropDownProps) {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem 
+            <DropdownMenuItem
             >Create Category
             </DropdownMenuItem>
-            <DropdownMenuItem 
+            <DropdownMenuItem
               onClick={() => { handleCreateOrphanChannel() }}
             >
               Create Channel
