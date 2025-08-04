@@ -1,18 +1,24 @@
 import type { ServerType } from "@/types/app.types";
+import { useNavigate } from "@tanstack/react-router";
 
 interface ServerListProps {
   servers: ServerType[] | null;
+  selectedServer: string;
 }
 
 
-export const ServerList: React.FC<ServerListProps> = ({ servers }) => {
+export const ServerList: React.FC<ServerListProps> = ({ servers, selectedServer }) => {
+  const navigate = useNavigate();
   return (
     <div>
       {servers?.map((server) => {
+        const isActive = server.id === selectedServer;
         return (
-          <div key={server.id} className='w-full h-14  flex items-center justify-center p-0 hover:bg-zinc-800 transition-colors cursor-pointer group'
+          <div key={server.id} className={`w-full h-14  flex items-center justify-center p-0 hover:bg-zinc-800 transition-colors cursor-pointer group 
+${isActive ? 'bg-zinc-800' : 'bg-zinc-700'}`}
             onClick={() => {
-
+              navigate({ to: `/server/${server.id}` });
+              localStorage.setItem('selectedServer', server.id);
             }}>
             {server.icon ? (
               <img
