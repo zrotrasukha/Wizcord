@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useState, useMemo, createContext } from 'react'
+import { useState } from 'react'
 import ServerDialogue from '@/components/serverDialogue'
-import { createApi } from '@/lib/api'
 import type { ChannelType, MessageType } from '@/types/app.types'
 import Sidebar from '@/components/sidebar'
 import SecondSidebar from '@/components/secondSidebar'
@@ -9,29 +8,38 @@ import ChatBox from '@/components/ChatBox'
 import { LoadingPage } from '@/components/ui/loading'
 import type { contextType } from '@/types/context.type'
 import { CreateChannelDialogue } from '@/components/createChannelDialogue'
-import { fakeChannels, mockMessages } from '@/lib/mock'
+import { mockMessages } from '@/lib/mock'
 import { useAuthToken } from '@/hooks/useAuth'
 import { useServer } from '@/hooks/useServer'
+import { MainContextProvider } from '@/providers/MainContext'
+import { useApi } from '@/hooks/useApi'
+import { useChannels } from '@/hooks/useChannels'
 
 export const Route = createFileRoute('/')({
   component: RouteComponent,
 })
 
-export const MainContext = createContext<contextType | null>(null);
-
 function RouteComponent() {
+  const api = useApi();
   const { token, setToken, isLoading: isAuthLoading, isSignedIn } = useAuthToken();
   const [showServerDialogue, setShowServerDialogue] = useState(false);
   const [selectSelectedChannel, setSelectedChannel] = useState<ChannelType | null>(null);
   const [messages, setMessages] = useState<MessageType[]>(mockMessages);
   const [showChannelCreateDialogue, setShowChannelCreateDialogue] = useState(false);
-  const [channels, setChannels] = useState<ChannelType[]>(fakeChannels);
+  const { channels, setChannels } = useChannels({ api, token });
   const [channelCreationContext, setChannelCreationContext] = useState<{
     categoryId?: string;
     serverId: string;
   } | null>(null);
 
-  const api = useMemo(() => token ? createApi(token) : null, [token]);
+  const contextValue: contextType = {
+    token,
+    setToken,
+    showChannelCreateDialogue,
+    setShowChannelCreateDialogue,
+    channelCreationContext,
+    setChannelCreationContext,
+  }
   const { servers, isServerLoading, refreshServers } = useServer({ api, token });
 
   const onCancel = () => {
@@ -43,11 +51,7 @@ function RouteComponent() {
     setShowServerDialogue(false);
   }
 
-  if (isAuthLoading || isServerLoading) {
-    return <LoadingPage />
-  }
-
-  if (!isSignedIn) {
+  if (isAuthLoading || isServerLoading && isSignedIn) {
     return <LoadingPage />
   }
 
@@ -81,14 +85,7 @@ function RouteComponent() {
 
   return (
     <>
-      <MainContext.Provider value={{
-        token,
-        setToken,
-        showChannelCreateDialogue,
-        setShowChannelCreateDialogue,
-        channelCreationContext,
-        setChannelCreationContext
-      }}>
+      <MainContextProvider value={contextValue}>
         <div className='h-screen w-screen bg-zinc-950 flex relative'>
           <Sidebar servers={servers} setShowServerDialogue={setShowServerDialogue} />
           {servers && servers.length > 0 ? (
@@ -129,7 +126,7 @@ function RouteComponent() {
             />
           )}
         </div>
-      </MainContext.Provider>
+      </MainContextProvider>
     </>
   )
 }
