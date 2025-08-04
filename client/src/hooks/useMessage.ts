@@ -4,14 +4,12 @@ import type { MessageType, ChannelType } from '@/types/app.types'
 export function useMessages(selectedChannel: ChannelType | null) {
   const [messages, setMessages] = useState<MessageType[]>([])
 
-  // Optional: fetch initial messages if you plan to load from server later
   useEffect(() => {
     if (!selectedChannel) {
       setMessages([])
       return
     }
 
-    // Later: replace this with real fetch logic
     const mockMessages: MessageType[] = [
       {
         id: 'm1',
