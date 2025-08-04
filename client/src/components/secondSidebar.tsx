@@ -10,10 +10,7 @@ const SecondSidebar = ({ server, selectedChannel, onChannelSelect, channels, set
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const ctx = useContext(MainContext);
 
-  console.log('SecondSidebar rendering:', { server, ctx, channels });
-
   if (!ctx) {
-    console.log('SecondSidebar: Context is null!');
     return null;
   }
 
