@@ -13,6 +13,7 @@ import { Route as TokenRouteImport } from './routes/token'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as CrudeRouteImport } from './routes/crude'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ServerServerIdRouteImport } from './routes/server/$serverId'
 
 const TokenRoute = TokenRouteImport.update({
   id: '/token',
@@ -34,18 +35,25 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServerServerIdRoute = ServerServerIdRouteImport.update({
+  id: '/server/$serverId',
+  path: '/server/$serverId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/crude': typeof CrudeRoute
   '/signin': typeof SigninRoute
   '/token': typeof TokenRoute
+  '/server/$serverId': typeof ServerServerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/crude': typeof CrudeRoute
   '/signin': typeof SigninRoute
   '/token': typeof TokenRoute
+  '/server/$serverId': typeof ServerServerIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/crude': typeof CrudeRoute
   '/signin': typeof SigninRoute
   '/token': typeof TokenRoute
+  '/server/$serverId': typeof ServerServerIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/crude' | '/signin' | '/token'
+  fullPaths: '/' | '/crude' | '/signin' | '/token' | '/server/$serverId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/crude' | '/signin' | '/token'
-  id: '__root__' | '/' | '/crude' | '/signin' | '/token'
+  to: '/' | '/crude' | '/signin' | '/token' | '/server/$serverId'
+  id: '__root__' | '/' | '/crude' | '/signin' | '/token' | '/server/$serverId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   CrudeRoute: typeof CrudeRoute
   SigninRoute: typeof SigninRoute
   TokenRoute: typeof TokenRoute
+  ServerServerIdRoute: typeof ServerServerIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/server/$serverId': {
+      id: '/server/$serverId'
+      path: '/server/$serverId'
+      fullPath: '/server/$serverId'
+      preLoaderRoute: typeof ServerServerIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   CrudeRoute: CrudeRoute,
   SigninRoute: SigninRoute,
   TokenRoute: TokenRoute,
+  ServerServerIdRoute: ServerServerIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
