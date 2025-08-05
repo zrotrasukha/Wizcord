@@ -45,20 +45,3 @@ export const createServer = async (c: Context, body: createServerType): Promise<
   return c.json({ server: createdServer }, OK);
 }
 
-export const getServerChannels = async (c: Context, serverId: string)
-  : Promise<Response> => {
-  if (!serverId) {
-    return c.json({ error: "Server ID is required" }, NOT_FOUND);
-  }
-  // Ensure user has access to the server
-  const userId = c.get("userId");
-  const serverAccess = await ServerServices.checkServerAccessForUser(serverId, userId);
-  if (serverAccess) return c.json({ error: "Server Access denied" }, NOT_FOUND);
-
-  // Fetch channels for the server
-  const channels = ServerServices.getChannels(serverId);
-  if (!channels) {
-    return c.json({ error: "No channels found for this server" }, NOT_FOUND);
-  }
-  return c.json({ channels }, OK);
-}
