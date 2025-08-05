@@ -53,18 +53,21 @@ export const channel = pgTable(
   'channels', {
   id: uuid('id').primaryKey().defaultRandom(),
   serverId: uuid('serverId').references(() => server.id).notNull(),
+  name: varchar('name', { length: 100 }).notNull(),
   type: channelType().notNull(),
   categoryId: uuid('categoryId').references(() => category.id),
   createdAt: timestamp('createdAt', { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp('createdAt', { withTimezone: true }).defaultNow()
+  updatedAt: timestamp('updatedAt', { withTimezone: true }).defaultNow()
 }
 )
 
 export const message = pgTable(
   'messages', {
   id: uuid('id').primaryKey().defaultRandom(),
-  content: text().notNull(),
+  content: text('content').notNull(),
   serverId: uuid('serverId').notNull().references(() => server.id),
-  channelId: uuid('channelId').references(() => channel.id).notNull()
+  channelId: uuid('channelId').references(() => channel.id).notNull(),
+  authorId: text('authorId').notNull().references(() => user.id),
+  createdAt: timestamp('createdAt', { withTimezone: true }).defaultNow()
 }
 )
