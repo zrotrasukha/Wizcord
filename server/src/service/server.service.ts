@@ -1,5 +1,5 @@
 import { db } from '@/src/db/db';
-import { server, serverMember } from '@/src/db/schemas/schema';
+import { channel, server, serverMember } from '@/src/db/schemas/schema';
 import { and, eq, or } from 'drizzle-orm';
 import type { Context } from 'hono';
 import { NOT_FOUND } from '../utils/http-status-code';
@@ -65,16 +65,6 @@ export const checkServerAccessForUser =
     return true;
   }
 
-export const getChannels = async (serverId: string) => {
-  const channels = await db
-    .select()
-    .from(serverMember)
-    .where(eq(serverMember.serverId, serverId))
-    .limit(1);
-  if (!channels) {
-    return { error: "No channels found for this server" };
-  }
-}
 
 
 
