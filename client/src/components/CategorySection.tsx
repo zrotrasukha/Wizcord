@@ -57,9 +57,7 @@ const CategorySection = ({
             <div key={channel.id} onClick={() => handleChannelClick(channel)}>
               <div
                 className={`flex items-center h-7 rounded text-sm mb-2 text-gray-400 hover:bg-zinc-600 cursor-pointer px-2 ${selectedChannel?.id === channel.id
-                  ? "bg-zinc-600 text-white"
-                  : ""
-                  }`}
+                  && "bg-zinc-600 text-white"}`}
               >
                 {channel.type === "text" ? (
                   <Hash className="mr-2 h-4" />
