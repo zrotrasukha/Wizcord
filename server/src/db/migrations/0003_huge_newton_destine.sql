@@ -1,0 +1,1 @@
+ALTER TABLE "channels" ADD COLUMN "visibility" "visibility" DEFAULT 'public' NOT NULL;
