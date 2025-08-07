@@ -1,3 +1,4 @@
+import type { channelType } from "@shared/app.type";
 
 export type ServerType = {
   name: string;
@@ -11,7 +12,7 @@ export type ServerType = {
 
 
 export interface Category {
-  id: string;
+  id: string
   name: string;
   serverId: string;
 }
@@ -35,10 +36,9 @@ export interface MessageType {
 
 export interface SecondSidebarProps {
   serverId: string;
-  selectedChannel: ChannelType | null;
-  onChannelSelect: (channel: ChannelType) => void;
-  channels: ChannelType[];
-  setChannels: React.Dispatch<React.SetStateAction<ChannelType[]>>;
+  selectedChannel: channelType | null;
+  onChannelSelect: (channel: channelType) => void;
+  setChannels: React.Dispatch<React.SetStateAction<channelType[]>>;
 }
 
 
@@ -47,5 +47,5 @@ export interface CreateChannelDialogueProps {
   onCancel: () => void;
   categoryId?: string; // Optional! If provided = assign to category, if not = orphan
   serverId: string;
-  onChannelCreate: (channel: ChannelType) => void;
+  onChannelCreate: (channel: channelType) => void;
 }
