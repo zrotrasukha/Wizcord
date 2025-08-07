@@ -16,7 +16,7 @@ interface MainDropDownProps {
   serverId: string;
   triggerName: string;
   categories: Category[];
-  setCategories: React.Dispatch<React.SetStateAction<Category[]>>;
+  refreshCategories: () => Promise<void>;
 }
 
 export default function MainDropDown(props: MainDropDownProps) {
@@ -53,6 +53,7 @@ export default function MainDropDown(props: MainDropDownProps) {
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem
+              onClick={() => { setCreateCategory(true) }}
             >Create Category
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -68,10 +69,9 @@ export default function MainDropDown(props: MainDropDownProps) {
       {createCategory && (
         <CreateCategory
 
-          setCategories={props.setCategories}
           onComplete={handleCreateCategoryComplete}
           onCancel={handleCreateCategoryComplete}
-          categories={props.categories}
+          refreshCategories={props.refreshCategories}
 
         />
       )}
