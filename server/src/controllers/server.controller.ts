@@ -2,12 +2,9 @@ import type { Context } from "hono";
 import * as ServerServices from "../service/server.service";
 import { ensureUserExists } from "../service/user.service";
 import { NOT_FOUND, OK } from "../utils/http-status-code";
-import type { createServerType, ReturnServerType } from "../types/server.type";
-import { server, serverMember } from "../db/schemas/schema";
-import { db } from "../db/db";
+import type { CreateServerType } from "../types/server.type";
 import { createClerkClient } from "@clerk/backend";
-import { and, eq } from "drizzle-orm";
-import type { ChannelType } from "../../../client/src/types/app.types";
+import type { serverType } from "@shared/app.type";
 
 const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY })
 
@@ -17,7 +14,7 @@ export const getServers = async (c: Context): Promise<Response> => {
   return c.json({ servers }, OK);
 }
 
-export const createServer = async (c: Context, body: createServerType): Promise<Response> => {
+export const createServer = async (c: Context, body: CreateServerType): Promise<Response> => {
   const userId = c.get("userId");
   const { name, description, icon } = body;
   const user = await clerkClient.users.getUser(userId);
@@ -32,7 +29,7 @@ export const createServer = async (c: Context, body: createServerType): Promise<
   }
   await ensureUserExists(userId, userInfo)
 
-  const createdServer: ReturnServerType[] = await ServerServices.createServer(userId, {
+  const createdServer: serverType[] = await ServerServices.createServer(userId, {
     name,
     description: description || '',
     icon: icon || ''
