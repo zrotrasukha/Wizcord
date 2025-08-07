@@ -1,5 +1,5 @@
 import { type ApiType } from "@/lib/api";
-import type { ServerType } from "@/types/app.types";
+import type { serverType } from "@shared/app.type";
 import { useCallback, useEffect, useState } from "react"
 
 interface useServerProps {
@@ -9,7 +9,7 @@ interface useServerProps {
 
 export const useServer = ({ api, token }: useServerProps) => {
 
-  const [servers, setServers] = useState<ServerType[] | null>([]);
+  const [servers, setServers] = useState<serverType[] | null>([]);
   const [isServerLoading, setIsServerLoading] = useState(true);
 
   const fetchServers = useCallback(async () => {
@@ -24,7 +24,7 @@ export const useServer = ({ api, token }: useServerProps) => {
 
       const data = await serverRes.json();
       if (data && typeof data === 'object' && 'servers' in data && Array.isArray(data.servers)) {
-        return data.servers as ServerType[];
+        return data.servers as serverType[];
       }
 
       console.error('Unexpected response format:', data);
@@ -40,7 +40,7 @@ export const useServer = ({ api, token }: useServerProps) => {
     setIsServerLoading(true);
     const loadServers = async () => {
       const servers = await fetchServers();
-      setServers(servers as ServerType[]);
+      setServers(servers as serverType[]);
       setIsServerLoading(false);
     }
     loadServers();
@@ -49,7 +49,7 @@ export const useServer = ({ api, token }: useServerProps) => {
   const refreshServers = useCallback(async () => {
     if (!token) return;
     const servers = await fetchServers();
-    setServers(servers as ServerType[]);
+    setServers(servers as serverType[]);
   }, [fetchServers, token])
 
 
