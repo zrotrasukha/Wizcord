@@ -1,15 +1,15 @@
-import type { ChannelType } from "@/types/app.types";
 import { Hash, Volume2 } from "lucide-react";
+import type { channelType } from "@shared/app.type";
 
 interface OrphanChannels {
-  channels: ChannelType[];
+  channels: channelType[];
   serverId: string;
-  onChannelSelect: (channel: ChannelType) => void;
-  selectedChannel: ChannelType | null;
+  onChannelSelect: (channel: channelType) => void;
+  selectedChannel: channelType | null;
 }
 export const OrphanChannels = ({ channels, serverId, onChannelSelect, selectedChannel }: OrphanChannels) => {
 
-  const handleChannelClick = (channel: ChannelType) => {
+  const handleChannelClick = (channel: channelType) => {
     onChannelSelect(channel);
   }
   const orphanChannels = channels.filter((ch) => !ch.categoryId && ch.serverId === serverId)
