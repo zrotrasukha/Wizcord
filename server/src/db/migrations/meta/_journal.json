@@ -22,6 +22,27 @@
       "when": 1754368901772,
       "tag": "0002_special_blacklash",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1754548847885,
+      "tag": "0003_huge_newton_destine",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1754568329305,
+      "tag": "0004_wonderful_randall",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1754570344150,
+      "tag": "0005_good_eddie_brock",
+      "breakpoints": true
     }
   ]
 }
