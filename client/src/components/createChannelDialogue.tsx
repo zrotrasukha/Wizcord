@@ -12,35 +12,78 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useContext, useState } from 'react';
 import { MainContext } from '@/providers/MainContext'
-import type { ChannelType } from '@/types/app.types';
+import type { CreateChannelType } from '@shared/app.type'
+import { useApi } from '@/hooks/useApi';
+import { useAuthToken } from '@/hooks/useAuth';
+import { useChannel } from '@/hooks/useChannel';
 
 interface CreateChannelDialogueProps {
   onComplete: () => void;
   onCancel: () => void;
-  onChannelCreate: (channel: ChannelType) => void;
+  refreshChannels?: () => Promise<void>;
 }
 
 export const CreateChannelDialogue = (props: CreateChannelDialogueProps) => {
   const [selectedValue, setSelectedValue] = useState<string>('text');
   const [channelName, setChannelName] = useState<string>('');
-
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const api = useApi();
+  const { token } = useAuthToken();
   const ctx = useContext(MainContext)
+
   if (!ctx) throw new Error("Show channel Context doesn't exist");
 
-  const { channelCreationContext, setShowChannelCreateDialogue } = ctx;
+  const { setShowChannelCreateDialogue, serverId, channelCreationContext } = ctx;
 
-  const handleSubmit = () => {
-    const newChannel: ChannelType = {
-      id: crypto.randomUUID(),
-      name: channelName.trim(),
-      type: selectedValue || 'text',
-      serverId: ctx.channelCreationContext?.serverId || '',
-      categoryId: channelCreationContext?.categoryId || '',
+  const categoryId = channelCreationContext?.categoryId;
+
+  const { createChannel, refreshChannels } = useChannel({
+    api,
+    serverId: serverId,
+    token: token || ''
+  });
+
+  const handleSubmit = async () => {
+    if (!serverId || !channelName.trim()) {
+      console.error("Missing required fields");
+      return;
     }
-    props.onChannelCreate(newChannel);
-    props.onComplete();
+
+    setIsLoading(true);
+
+    try {
+      const newChannel: CreateChannelType = {
+        serverId: serverId,
+        categoryId: categoryId || null,
+        name: channelName.trim(),
+        type: selectedValue as 'text' | 'voice',
+        visibility: 'public'
+      }
+
+      const res = await createChannel(newChannel);
+
+      if (!res) {
+        console.error("Failed to create channel");
+        return;
+      }
+
+      console.log("Channel created successfully", res);
+
+      await refreshChannels();
+      if (props.refreshChannels) {
+        await props.refreshChannels();
+      }
+
+      setShowChannelCreateDialogue(false);
+      props.onComplete();
+    } catch (error) {
+      console.error("Error creating channel:", error);
+      // show notification or error message to user
+    } finally {
+      setIsLoading(false);
+    }
   }
+
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center">
       <div className="bg-white rounded-lg p-0 w-[400px] shadow-xl">
@@ -53,7 +96,6 @@ export const CreateChannelDialogue = (props: CreateChannelDialogueProps) => {
           </CardHeader>
 
           <CardContent className="flex flex-col gap-3">
-
             <Label htmlFor="channelType" className="text-xs text-gray-700/40">
               Select channel Type
             </Label>
@@ -80,17 +122,24 @@ export const CreateChannelDialogue = (props: CreateChannelDialogueProps) => {
               placeholder="Your legendary channel Name"
               value={channelName}
               onChange={(e) => setChannelName(e.target.value)}
+              disabled={isLoading}
             />
+
             <div className="flex justify-end gap-2 mt-4">
               <Button
                 variant="outline"
                 onClick={() => setShowChannelCreateDialogue(false)}
+                disabled={isLoading}
               >
                 Cancel
               </Button>
-              <Button type='submit'
+              <Button
+                type='submit'
                 onClick={handleSubmit}
-              >Create</Button>
+                disabled={!channelName.trim() || isLoading}
+              >
+                {isLoading ? 'Creating...' : 'Create'}
+              </Button>
             </div>
           </CardContent>
         </Card>
