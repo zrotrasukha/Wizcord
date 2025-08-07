@@ -3,27 +3,25 @@ import { clerkMiddleware } from "@hono/clerk-auth"
 import { cors } from 'hono/cors'
 import serverHandler from "./src/routes/server.route";
 import onError from "./src/middlewares/error.middleware";
-// import { pinoLogger } from 'hono-pino'
-// import pino, { transport } from "pino";
-import { logger } from 'hono/logger'
+import { pinoLogger } from 'hono-pino'
+import pino, { transport } from "pino";
 import categoryHandler from "./src/routes/category.route";
 import channelHandler from "./src/routes/channel.route";
 import { createClerkClient } from "@clerk/backend";
 
 export const authClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 const app = new Hono().basePath('/api/')
-app.use(logger());
 
-// app.use(pinoLogger({
-//     pino: pino(
-//         transport({
-//             target: 'pino-pretty',
-//             options: {
-//                 colorize: true
-//             }
-//         })
-//     )
-// }));
+app.use(pinoLogger({
+  pino: pino(
+    transport({
+      target: 'pino-pretty',
+      options: {
+        colorize: true
+      }
+    })
+  )
+}));
 
 app.use('*', cors({
   origin: "http://localhost:3000",
