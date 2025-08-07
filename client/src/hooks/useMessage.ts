@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import type { MessageType, ChannelType } from '@/types/app.types'
+import type { MessageType } from '@/types/app.types'
+import type { channelType } from '@shared/app.type'
 
-export function useMessages(selectedChannel: ChannelType | null) {
+export function useMessages(selectedChannel: channelType | null) {
   const [messages, setMessages] = useState<MessageType[]>([])
 
   useEffect(() => {
