@@ -3,7 +3,6 @@ import * as ServerController from "../controllers/server.controller";
 import requireAuth from "../middlewares/auth.middleware";
 import { customZValidator as zv } from "@/src/middlewares/zodValidator.middleware"
 import { createServerSchema } from "../types/server.type";
-import channelHandler from "./channel.route";
 
 const serverHandler = new Hono()
   .post('/create', requireAuth, zv('json', createServerSchema), async (c) => {
@@ -11,5 +10,7 @@ const serverHandler = new Hono()
     return await ServerController.createServer(c, body);
   })
   .get("/getservers", requireAuth, async (c) => ServerController.getServers(c))
-  .route('/channel', channelHandler)
+
+
+
 export default serverHandler;
