@@ -1,8 +1,6 @@
 import { db } from '@/src/db/db';
-import { channel, server, serverMember } from '@/src/db/schemas/schema';
+import { server, serverMember } from '@/src/db/schemas/schema';
 import { and, eq, or } from 'drizzle-orm';
-import type { Context } from 'hono';
-import { NOT_FOUND } from '../utils/http-status-code';
 
 export const getServers = async (userId: string) => {
   const servers = await db
@@ -41,16 +39,10 @@ export const createServer = async (
       admin: userId,
       description: body.description || '',
       icon: body.icon || '',
-    }).returning({
-      id: server.id,
-      name: server.name,
-      icon: server.icon,
-      description: server.description,
-      createdAt: server.createdAt,
-      updatedAt: server.updatedAt,
-    })
+    }).returning()
   return createdServer;
 }
+
 export const checkServerAccessForUser =
   async (serverId: string, userId: string)
     : Promise<boolean> => {
