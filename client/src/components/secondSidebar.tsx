@@ -1,31 +1,57 @@
-import type { SecondSidebarProps, Category } from "@/types/app.types";
+import type { SecondSidebarProps } from "@/types/app.types";
 import { useContext, useEffect, useState } from "react";
 import MainDropDown from "@/components/MainDropDown";
 import { MainContext } from "@/providers/MainContext";
-import { Categories, fakeChannels } from "@/lib/mock";
 import { OrphanChannels } from "./OrphanChannels";
 import CategorySection from "./CategorySection";
+import { useCategory } from "@/hooks/useCategory";
+import { useChannel } from "@/hooks/useChannel";
+import { useApi } from "@/hooks/useApi";
+import { useAuthToken } from "@/hooks/useAuth";
 
 const SecondSidebar = ({
   serverId,
   selectedChannel,
   onChannelSelect,
-  channels,
-  setChannels
 }: SecondSidebarProps) => {
-  const [categories, setCategories] = useState<Category[]>(Categories);
+  const { categories, refreshCategories, isCategoryLoading } = useCategory({ serverId });
+  const api = useApi();
+  const { token } = useAuthToken();
+
+  const { channels, loadingChannels, refreshChannels } = useChannel({
+    api,
+    serverId: serverId || '',
+    token: token || ''
+  });
+
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const ctx = useContext(MainContext);
 
   if (!ctx) return null;
 
-  const { setShowChannelCreateDialogue, setChannelCreationContext } = ctx;
+  const { showChannelCreateDialogue, setShowChannelCreateDialogue, setChannelCreationContext, channelCreationContext } = ctx;
+
+  const handleChannelCreated = async (categoryId?: string) => {
+
+    await Promise.all([
+      refreshChannels(),
+      refreshCategories()
+    ]);
+
+    if (categoryId && !expandedCategories.includes(categoryId)) {
+      setExpandedCategories((prev) => [...prev, categoryId]);
+    }
+  };
+
 
   useEffect(() => {
-    setChannels(fakeChannels.filter((channel) => channel.serverId === serverId));
-  }, [serverId, setChannels]);
+    if (!showChannelCreateDialogue) {
+      const categoryId = channelCreationContext?.categoryId;
+      handleChannelCreated(categoryId)
+    }
+  }, [showChannelCreateDialogue])
 
-  const handleCreateChannelForCategory = (categoryId: string) => {
+  const handleCreateChannelForCategory = async (categoryId: string) => {
     setShowChannelCreateDialogue(true);
     setChannelCreationContext({ serverId, categoryId });
   };
@@ -43,10 +69,10 @@ const SecondSidebar = ({
       {/* Server Heading */}
       <div className="flex items-center justify-center p-4 bg-zinc-800 mb-4">
         <MainDropDown
+          refreshCategories={refreshCategories}
           serverId={serverId}
-          triggerName={'Server'} // Replace with real name if available in props
+          triggerName={'Server'}
           categories={categories}
-          setCategories={setCategories}
         />
       </div>
 
@@ -56,6 +82,8 @@ const SecondSidebar = ({
           <div className="flex items-center justify-center h-full text-gray-400">
             <p>No server selected</p>
           </div>
+        ) : (isCategoryLoading || loadingChannels) ? (
+          <div className="text-center text-gray-400">Loading...</div>
         ) : (
           <>
             <OrphanChannels
