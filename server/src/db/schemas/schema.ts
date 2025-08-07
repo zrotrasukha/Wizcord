@@ -52,9 +52,10 @@ export const category = pgTable(
 export const channel = pgTable(
   'channels', {
   id: uuid('id').primaryKey().defaultRandom(),
-  serverId: uuid('serverId').references(() => server.id).notNull(),
   name: varchar('name', { length: 100 }).notNull(),
   type: channelType().notNull(),
+  visibility: visibility().notNull().default('public'),
+  serverId: uuid('serverId').references(() => server.id).notNull(),
   categoryId: uuid('categoryId').references(() => category.id),
   createdAt: timestamp('createdAt', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updatedAt', { withTimezone: true }).defaultNow()
