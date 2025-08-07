@@ -2,7 +2,6 @@
 import { createFileRoute, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
 import ServerDialogue from '@/components/serverDialogue'
-import type { ChannelType } from '@/types/app.types'
 import Sidebar from '@/components/sidebar'
 import SecondSidebar from '@/components/secondSidebar'
 import ChatBox from '@/components/ChatBox'
@@ -13,7 +12,7 @@ import { useAuthToken } from '@/hooks/useAuth'
 import { useServer } from '@/hooks/useServer'
 import { MainContextProvider } from '@/providers/MainContext'
 import { useApi } from '@/hooks/useApi'
-import { useChannels } from '@/hooks/useChannels'
+import { useChannel } from '@/hooks/useChannel'
 import { useMessages } from '@/hooks/useMessage'
 
 export const Route = createFileRoute('/server/$serverId')({
@@ -26,13 +25,22 @@ function RouteComponent() {
   const { token, setToken, isLoading: isAuthLoading, isSignedIn } = useAuthToken();
   const [showServerDialogue, setShowServerDialogue] = useState(false);
   const [showChannelCreateDialogue, setShowChannelCreateDialogue] = useState(false);
-  const { channels, setChannels, selectedChannel, setSelectedChannel } = useChannels({ api, token });
+  const { setChannels, selectedChannel, setSelectedChannel } = useChannel({ api, serverId, token });
   const [channelCreationContext, setChannelCreationContext] = useState<{
     categoryId?: string;
     serverId: string;
   } | null>(null);
 
-  const contextValue: contextType = { token, setToken, showChannelCreateDialogue, setShowChannelCreateDialogue, channelCreationContext, setChannelCreationContext };
+  const contextValue: contextType = {
+    token,
+    setToken,
+    showChannelCreateDialogue,
+    setShowChannelCreateDialogue,
+    channelCreationContext,
+    setChannelCreationContext,
+    serverId
+  };
+
   const { servers, isServerLoading, refreshServers } = useServer({ api, token });
 
   const { sendMessageHandler, messages } = useMessages(selectedChannel);
@@ -42,12 +50,6 @@ function RouteComponent() {
   }
 
   // Route native functions
-  const handleChannelCreate = (newChannel: ChannelType) => {
-    setChannels((prev) => [...prev, newChannel]);
-    setShowChannelCreateDialogue(false);
-    setChannelCreationContext(null);
-  }
-
   const handleChannelCancel = () => {
     setShowChannelCreateDialogue(false);
     setChannelCreationContext(null);
@@ -73,7 +75,6 @@ function RouteComponent() {
           {servers && servers.length > 0 ? (
             <>
               <SecondSidebar
-                channels={channels}
                 setChannels={setChannels}
                 serverId={serverId}
                 selectedChannel={selectedChannel}
@@ -102,7 +103,6 @@ function RouteComponent() {
           {/* Channel Creation Dialog */}
           {showChannelCreateDialogue && (
             <CreateChannelDialogue
-              onChannelCreate={handleChannelCreate}
               onCancel={handleChannelCancel}
               onComplete={handleChannelCancel}
             />
