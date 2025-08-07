@@ -1,14 +1,15 @@
 import { ChevronDown, ChevronRight, Hash, Volume2, Plus } from "lucide-react";
-import type { ChannelType, Category } from "@/types/app.types";
+import type { channelType } from "@shared/app.type";
+import type { Category } from "@/types/app.types";
 
 interface CategorySectionProps {
   category: Category;
-  channels: ChannelType[];
+  channels: channelType[];
   serverId: string;
-  selectedChannel: ChannelType | null;
+  selectedChannel: channelType | null;
   isExpanded: boolean;
   onToggleCategory: (categoryId: string) => void;
-  onChannelSelect: (channel: ChannelType) => void;
+  onChannelSelect: (channel: channelType) => void;
   onCreateChannel: (categoryId: string) => void;
 }
 
@@ -26,7 +27,7 @@ const CategorySection = ({
     (ch) => ch.categoryId === category.id && ch.serverId === serverId
   );
 
-  const handleChannelClick = (channel: ChannelType) => {
+  const handleChannelClick = (channel: channelType) => {
     onChannelSelect(channel);
   };
 
