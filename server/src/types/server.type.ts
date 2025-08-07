@@ -5,10 +5,19 @@ export type ReturnServerType = Omit<ServerType, 'name' | 'admin' | 'icon' | 'des
 
 export const joinServerType = z.url();
 
-export const createServerSchema = z.object({
-  name: z.string().min(1).max(225),
-  icon: z.url().optional(),
-  description: z.string().min(1).max(500).optional(),
-})
+export const createChannelSchema = z.object({
+  name: z.string(),
+  type: z.enum(["text", "voice"]),
+  visibility: z.enum(["public", "private"]),
+  serverId: z.string(),
+  categoryId: z.string().nullable(),
+});
 
-export type createServerType = z.infer<typeof createServerSchema>;
+
+export const createServerSchema = z.object({
+  name: z.string(),
+  icon: z.string().optional(),
+  description: z.string().optional(),
+});
+
+export type CreateServerType = z.infer<typeof createServerSchema>;
