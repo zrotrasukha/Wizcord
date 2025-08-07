@@ -1,11 +1,11 @@
-import type { ChannelType } from '@/types/app.types';
 import { Textarea } from './ui/textarea'
 import { Send, Volume2 } from 'lucide-react';
 import { useState } from 'react';
 import { type MessageType } from '@/types/app.types'
+import type { channelType } from '@shared/app.type';
 
 interface ChatBoxProps {
-  selectedChannel: ChannelType | null;
+  selectedChannel: channelType | null;
   messages: MessageType[]
   onSendMessage: (message: string) => void;
 }
