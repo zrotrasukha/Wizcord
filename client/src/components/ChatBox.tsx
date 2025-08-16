@@ -1,5 +1,5 @@
 import { SendHorizonal, Volume2 } from 'lucide-react';
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { type MessageType } from '@/types/app.types'
 import type { channelType } from '@shared/app.type';
 
@@ -10,12 +10,7 @@ interface ChatBoxProps {
 }
 export default function ChatBox({ selectedChannel, messages, onSendMessage }: ChatBoxProps) {
     const [message, setMessage] = useState('');
-    const endOfMessagesRef = useRef<HTMLDivElement | null>(null);
     const divRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        endOfMessagesRef.current?.scrollIntoView({ behavior: 'auto' });
-    }, [onSendMessage]);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -24,7 +19,6 @@ export default function ChatBox({ selectedChannel, messages, onSendMessage }: Ch
         if (message.trim() === '') return;
         onSendMessage(message);
     }
-
 
     const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
         const text = e.currentTarget.innerText;
@@ -57,9 +51,9 @@ export default function ChatBox({ selectedChannel, messages, onSendMessage }: Ch
     }
     return (
         // Chat Box Container
-        <div className='flex-1 flex flex-col bg-stone-800 rounded-l-xl ml-2 my-[1px] border-l-zinc-700 border-[1px]'>
+        <div className='flex-1 flex flex-col bg-stone-800 rounded-l-xl ml-2 overflow-hidden'>
             {/* Messages Area */}
-            <div className='flex-1 overflow-scroll flex flex-col justify-end'>
+            <div className='flex-1 overflow-scroll flex flex-col-reverse'>
                 <ol>
                     {
                         messages.filter((msg) => msg.channelId === selectedChannel?.id)
@@ -71,7 +65,6 @@ export default function ChatBox({ selectedChannel, messages, onSendMessage }: Ch
                                 </li>
                             ))
                     }
-                    <div ref={endOfMessagesRef} />
                 </ol>
             </div>
             <form
@@ -87,7 +80,7 @@ export default function ChatBox({ selectedChannel, messages, onSendMessage }: Ch
                         </div>}
                     <div
                         ref={divRef}
-                        className='text-sm whitespace-pre-wrap wrap-break-word flex-1 outline-none px-4 py-2 relative z-10 max-h-1/2 overflow-scroll'
+                        className='text-sm whitespace-pre-wrap wrap-break-word flex-1 outline-none px-4 py-2 relative z-10 max-h-[40vh] overflow-scroll scroll-pb-2'
                         role='textarea'
                         aria-multiline="true"
                         aria-invalid="false"
